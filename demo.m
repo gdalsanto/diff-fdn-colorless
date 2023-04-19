@@ -46,16 +46,19 @@ for typeCell = types
             temp = A; clear A
             A.(type) = double(expm(skew(temp))*Gamma);
         case 'initDiffFDN'
-            % load parameters
+            % ugly quick fix
+            tempB = B; tempC = C; tempD = D; tempA = A; 
+
             load(fullfile(results_dir,'parameters_init.mat'))
-            temp = B; clear B
-            B.(type) = temp(:);        % input gains as column
-            temp = C; clear C
-            C.(type) = temp;
-            D.(type) = zeros(1:1);     % direct gains
             % make matrix A orthogonal 
             temp = A; clear A
-            A.(type) = double(expm(skew(temp))*Gamma);
+            Ainit = double(expm(skew(temp))*Gamma);  
+
+            B = tempB; C = tempC; D = tempD; A = tempA;             
+            B.(type) = ones(N,1);
+            C.(type) = ones(1,N);
+            D.(type) = zeros(1,1);
+            A.(type) = Ainit; 
         case 'Hadamard'
             A.(type) = fdnMatrixGallery(double(N),'Hadamard');
             B.(type) = ones(N,1);
