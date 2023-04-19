@@ -1,0 +1,83 @@
+function [matrix,revMatrix] = constructCascadedParaunitaryMatrix_mod( N, K, A, varargin )
+%constructCascadedParaunitaryMatrix - Create paraunitary matrix from
+%cascaded design
+% see Scattering in Feedback Delay Networks, IEEE TASLP submitted
+%
+% Syntax:  matrix = constructCascadedParaunitaryMatrix( N, K )
+%
+% Inputs:
+%    N - Size of the paraunitary matrix
+%    K - Number of cascaded stages
+%    sparsity (optional) - Time-wise sparsity [1 -> Inf] = [dense -> sparse]
+%    matrixType (optional) - Random or Hadamard matrix
+%
+% Outputs:
+%    matrix - Paraunitary matrix of size [N,N,degree]
+%    revMatrix - Inverse/Reverse matrix of matrix of size [N,N,degree]
+%
+% Example:
+%    constructCascadedParaunitaryMatrix( 3, 5 )
+%
+% See also: isParaunitary
+% Author: Dr.-Ing. Sebastian Jiro Schlecht, 
+% Aalto University, Finland
+% email address: sebastian.schlecht@aalto.fi
+% Website: sebastianjiroschlecht.com
+% 28 December 2019; Last revision: 28 December 2019
+% MOD: lead matrices from .mat file in the outputDir
+
+
+%% Input parser
+p = inputParser;
+p.addOptional('sparsity', 1, @(x) isnumeric(x) && isscalar(x) && x >= 1 );
+p.addOptional('matrixType','Hadamard',@(x) ischar(x) );
+p.addOptional('gainPerSample', 1, @(x) isnumeric(x) && isscalar(x) && x >= 0 );
+parse(p, varargin{:});
+
+sparsity = p.Results.sparsity;
+matrixType = p.Results.matrixType;
+gainPerSample = p.Results.gainPerSample;
+
+%% init matrix function
+
+    
+sparsityVector = [sparsity, ones(1,K-1)];
+
+%% construct paraunitary matrix
+matrix = hadamard(size(A,1))/sqrt(size(A,1));
+revMatrix = inv(matrix);
+
+pulseSize = 1;
+for it = 1:K
+    % shiftLeft are the delay lengths in samples of the 
+    [shiftLeft] = shiftMatrixDistribute(matrix, sparsityVector(it), 'pulseSize', pulseSize);
+    % apply (frequency-independent ?) gain per sample
+    G1 = diag(gainPerSample.^shiftLeft);
+    R1 = A(:,:,it) * G1;
+    
+    matrix = shiftMatrix(matrix, shiftLeft, 'left');
+    matrix = matrixConvolution(R1, matrix);
+    
+    revMatrix = shiftMatrix(revMatrix, shiftLeft, 'right');
+    revMatrix = matrixConvolution(revMatrix, inv(R1));
+   
+    pulseSize = pulseSize * N*sparsityVector(it);
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
