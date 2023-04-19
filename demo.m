@@ -112,7 +112,7 @@ figure(); hold on; grid on;
 for typeCell = types
     type = typeCell{1};
     res = db(abs(residues.(type)));
-    % res = res - mean(res);
+    res = res - mean(res);
     histogram(res,'FaceAlpha',0.1,'BinWidth',1)
 end
 legend(types)
