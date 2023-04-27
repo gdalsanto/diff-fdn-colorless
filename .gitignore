@@ -1,5 +1,4 @@
 __pycache__/
 .DS_Store
 *.asv 
-output/.
-
+/output
