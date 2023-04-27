@@ -25,3 +25,13 @@ class sparsity_loss(nn.Module):
             loss = loss + torch.norm(y_pred[i,:], 2)/torch.norm(y_pred[i,:], 1)
         loss = loss / batch_size
         return loss
+
+class neg_l1_norm(nn.Module):
+    '''negative l1 norm '''
+    def forward(self, y_pred, y_true):
+        batch_size = y_pred.size(dim=0)
+        loss = 0.0
+        for i in range(batch_size): # loop over batch elements
+            loss = loss - torch.norm(y_pred[i,:], 1)
+        loss = loss / batch_size
+        return loss 
