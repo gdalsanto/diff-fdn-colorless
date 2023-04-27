@@ -10,7 +10,7 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 addpath(genpath('utilities'))
-results_date = ['20230419-094709'];
+results_date = ['20230427-130404'];
 results_dir = fullfile('output',results_date);
 rng(13);
 mkdir(fullfile(results_dir,'ir'))
@@ -19,13 +19,13 @@ mkdir(fullfile(results_dir,'ir'))
 fs = 48000;         % sampling frequency
 fbin = fs * 10;     % number of frequency bin
 irLen = fs*2;       % ir length   
-types = {'DiffFDN','initDiffFDN','Hadamard','Householder','random'};
+types = {'random','DiffFDN','initDiffFDN'};
 
 
 %% construct FDNs 
 RT = 1.44*2;        % reverberation time (s)
 g = 10^(-3/fs/RT);  % gain per sample   (linear)
-
+g = 0.9999 ; 
 delays = [809, 877, 937, 1049, 1151, 1249, 1373, 1499];
 % attenuaton matrix
 Gamma = diag(g.^delays);
@@ -77,6 +77,12 @@ for typeCell = types
             C.(type) = ones(1,N);
             D.(type) = zeros(1,1);
             A.(type) = A.(type)*Gamma;
+        case 'diagonal'
+            A.(type) = eye(N);
+            B.(type) = ones(N,1);
+            C.(type) = ones(1,N);
+            D.(type) = zeros(1,1);
+            A.(type) = A.(type)*Gamma;
     end
 
     % generate impulse response
@@ -119,3 +125,20 @@ legend(types)
 title('Modal excitation')
 xlabel('Residue Magnitude (dB)')
 ylabel('Number of Occurence')
+
+% magnitude response 
+figure(); hold on; grid on;
+losses = {};
+for typeCell = types
+    type = typeCell{1};
+    [h,w] = freqz(squeeze(tfB.(type)), squeeze(tfA.(type)), 10*fs);
+    HdB = db(h) - mean(db(h));
+    plot(w, HdB);
+    losses.(type) = asyPLoss(h, ones(size(h)));
+end
+legend(types)
+title('Modal excitation')
+xlabel('Residue Magnitude (dB)')
+ylabel('Number of Occurence')
+
+
