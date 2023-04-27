@@ -20,7 +20,7 @@ import shutil
 import config
 from utility import * 
 from dataloader import split_dataset, get_dataloader, Dataset
-from losses import asy_p_loss, sparsity_loss
+from losses import asy_p_loss, sparsity_loss, neg_l1_norm
 from models import DiffFDN
 
 # check if gpu is available
@@ -60,7 +60,7 @@ optimizer = torch.optim.Adam(net.parameters(), lr=config.lr)
 criterionFreq = asy_p_loss()
 criterionFreq = criterionFreq.to(device)
 # temporal loss 
-criterionTime = sparsity_loss()
+criterionTime = neg_l1_norm()
 criterionTime = criterionTime.to(device)
 # scheduler 
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1 )
