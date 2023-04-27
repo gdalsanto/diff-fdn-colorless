@@ -10,7 +10,7 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 addpath(genpath('utilities'))
-results_date = ['20230427-130404'];
+results_date = ['20230419-094709'];
 results_dir = fullfile('output',results_date);
 rng(13);
 mkdir(fullfile(results_dir,'ir'))
@@ -19,14 +19,14 @@ mkdir(fullfile(results_dir,'ir'))
 fs = 48000;         % sampling frequency
 fbin = fs * 10;     % number of frequency bin
 irLen = fs*2;       % ir length   
-types = {'random','DiffFDN','initDiffFDN'};
+types = {'DiffFDN','initDiffFDN','random'};
 
 
 %% construct FDNs 
 RT = 1.44*2;        % reverberation time (s)
 g = 10^(-3/fs/RT);  % gain per sample   (linear)
 g = 0.9999 ; 
-delays = [809, 877, 937, 1049, 1151, 1249, 1373, 1499];
+delays =  [809., 877., 937., 1049., 1151., 1249., 1373., 1499.];
 % attenuaton matrix
 Gamma = diag(g.^delays);
 N = length(delays); 
@@ -50,14 +50,20 @@ for typeCell = types
             tempB = B; tempC = C; tempD = D; tempA = A; 
 
             load(fullfile(results_dir,'parameters_init.mat'))
+            % attenuaton matrix
+            Gamma = diag(g.^delays);
             % make matrix A orthogonal 
             temp = A; clear A
             Ainit = double(expm(skew(temp))*Gamma);  
-
-            B = tempB; C = tempC; D = tempD; A = tempA;             
-            B.(type) = ones(N,1);
-            C.(type) = ones(1,N);
+            temp = B; clear B 
+            B = tempB; 
+            B.(type) = temp';
+            temp = C; clear C
+            C = tempC; 
+            C.(type) = temp;
+            D = tempD; 
             D.(type) = zeros(1,1);
+            A = tempA;
             A.(type) = Ainit; 
         case 'Hadamard'
             A.(type) = fdnMatrixGallery(double(N),'Hadamard');
@@ -134,7 +140,7 @@ for typeCell = types
     [h,w] = freqz(squeeze(tfB.(type)), squeeze(tfA.(type)), 10*fs);
     HdB = db(h) - mean(db(h));
     plot(w, HdB);
-    losses.(type) = asyPLoss(h, ones(size(h)));
+    losses.(type) = asyPLoss(abs(h)-mean(abs(h)), ones(size(h)));
 end
 legend(types)
 title('Modal excitation')
