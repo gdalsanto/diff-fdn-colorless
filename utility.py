@@ -245,4 +245,8 @@ def skew_matrix(X):
     A = X.triu(1)
     return A - A.transpose(-1, -2)
 
+def compute_losss(loss_tuple, loss_list):
+    for i, loss_val in enumerate(loss_tuple):
+        loss_list[i] = loss_list[i] + loss_val
 
+    return loss_list

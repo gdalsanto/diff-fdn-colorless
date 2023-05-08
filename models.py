@@ -4,6 +4,7 @@
 import torch 
 import torch.nn as nn
 import torch.nn.utils.parametrize as parametrize 
+from utility import *
 
 class Skew(nn.Module):
     def forward(self, X):
@@ -16,9 +17,10 @@ class MatrixExponential(nn.Module):
 
 class DiffFDN(nn.Module):
     # recursive neural netwrok 
-    def __init__(self, N, gain_per_sample, delays, device):
+    def __init__(self, N, gain_per_sample, delays, sparse, device):
         super().__init__()
         self.device = device
+        self.sparse = sparse
         # input parameters
         self.N = N  # size of the FDN 
         self.gain_per_sample = gain_per_sample
@@ -60,9 +62,12 @@ class DiffFDN(nn.Module):
         H = Hchannel.squeeze()*C.squeeze()  
         H_mask = torch.ones((torch.sum(H, dim=-1)).size())
         H_mask[(x == 0).squeeze()] = 0 # pad on the right side 
-        h = torch.fft.irfft(torch.mul(torch.sum(H, dim=-1),H_mask), n=48000*8)
-        h = h/torch.max(torch.abs(h))
         param = (A.detach(), B.detach(), C.detach(), Gamma.detach(), m.detach())
+        if self.sparse:
+            h = self.compute_ir(48000*2, param)
+        else:
+            h = torch.fft.irfft(torch.mul(torch.sum(H, dim=-1),H_mask), n=48000*8)
+            h = h/torch.max(torch.abs(h))
         return H, h, param
 
     def print(self):
@@ -70,3 +75,12 @@ class DiffFDN(nn.Module):
             if param.requires_grad:
                 print(name, param.data)
 
+    def compute_ir(self, num, param):
+        x = get_frequency_samples(num)
+        x = torch.tensor(x.view(x.size(0), -1)) 
+        A, B, C, Gamma, m = param 
+        D = torch.diag_embed(x ** m)
+        H = torch.matmul(torch.matmul(C, torch.inverse(D - torch.matmul(A,Gamma))), B).squeeze()
+        h = torch.fft.irfft(H, n=48000*8)
+        h = h/torch.max(torch.abs(h))
+        return h

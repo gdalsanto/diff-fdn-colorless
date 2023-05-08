@@ -20,7 +20,7 @@ import shutil
 import config
 from utility import * 
 from dataloader import split_dataset, get_dataloader, Dataset
-from losses import asy_p_loss, sparsity_loss, neg_l1_norm
+from losses import *
 from models import DiffFDN
 
 # check if gpu is available
@@ -49,7 +49,8 @@ valid_loader = get_dataloader(
 )
 
 # initialize network 
-net = DiffFDN(config.N, config.gain_per_sample, config.learnDelays, device)
+sparse = config.max_nfft == config.min_nfft
+net = DiffFDN(config.N, config.gain_per_sample, config.learnDelays, sparse, device)
 # parameters initialization 
 net.apply(weights_init_normal)
 
@@ -59,8 +60,10 @@ optimizer = torch.optim.Adam(net.parameters(), lr=config.lr)
 # spectral loss
 criterionFreq = asy_p_loss()
 criterionFreq = criterionFreq.to(device)
+criterionFreqGlob = asy_p_loss()
+criterionFreqGlob = criterionFreqGlob.to(device)
 # temporal loss 
-criterionTime = neg_l1_norm()
+criterionTime = sparsity_loss()
 criterionTime = criterionTime.to(device)
 # scheduler 
 scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.1 )
@@ -71,7 +74,6 @@ x = torch.tensor(x.view(x.size(0), -1))
 H_t = []       
 train_loss, valid_loss = [], []
 save_lines = True    # if true saves in .wav the output of the delay lines
-
 # energy normalization
 with torch.no_grad():
     inputs, _ = next(iter(train_loader))
@@ -100,21 +102,32 @@ st = time.time()
 for epoch in range(config.max_epochs):
     epoch_loss = 0
     st_epoch = time.time()
+    losses_list = [0, 0, 0]
 
     for i, data in enumerate(train_loader):
         # batch processing
         inputs, labels = data 
         optimizer.zero_grad()
         H, h, param = net(inputs)
-        loss = criterionFreq(H, labels) + config.alpha*criterionTime(torch.abs(h), torch.ones(480000))
-
+        loss = criterionFreq(H, labels) + config.beta*criterionFreqGlob(H, labels, config.is_global) + config.alpha*criterionTime(h, torch.ones(480000))
+        
         epoch_loss += loss.item()
         loss.backward()
+
+        loss_tuple = (
+            criterionFreq(H, labels).item(), 
+            config.beta*criterionFreqGlob(H, labels, config.is_global).item(), 
+            config.alpha*criterionTime(h, torch.ones(480000)).item())
+        losses_list = compute_losss(loss_tuple, losses_list)
+
         optimizer.step()
 
     train_loss.append(epoch_loss/len(train_loader))
     scheduler.step()
-
+    print('losses: {:6.4f} - {:6.4f} - {:6.4f}'.format(
+        losses_list[0]/len(train_loader), 
+        losses_list[1]/len(train_loader), 
+        losses_list[2]/len(train_loader)))
     # ----------- VALIDATION
     epoch_loss = 0
     for i, data in enumerate(valid_loader):
@@ -122,7 +135,7 @@ for epoch in range(config.max_epochs):
         
         optimizer.zero_grad()
         H, h, _ = net(inputs)
-        loss = criterionFreq(H, labels) + config.alpha*criterionTime(torch.abs(h), torch.ones(480000))
+        loss = criterionFreq(H, labels) + config.beta*criterionFreqGlob(H, labels, config.is_global) + config.alpha*criterionTime(h, torch.ones(480000))
         
         epoch_loss += loss.item()
     
@@ -134,6 +147,7 @@ for epoch in range(config.max_epochs):
         valid_loss=valid_loss, 
         time=et_epoch-st_epoch)
     print(to_print)
+
 
 # end time 
 et = time.time()    
