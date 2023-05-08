@@ -10,15 +10,23 @@ class Dataset(torch.utils.data.Dataset):
     def __init__(self, num, min_nfft, max_nfft, device):
         # num: number of input pairs
 
-        angle = torch.zeros((num, max_nfft))
-        abs = torch.ones((num, max_nfft))
-        for i in range(num):
-            nfft = torch.randint(min_nfft, max_nfft, (1,))
-            angle[i,0:nfft] = torch.linspace(0, 1, nfft.item())
-            abs[i,nfft:] = 0
-
+        if min_nfft == max_nfft:
+            # sparse sampling 
+            self.sparse = True
+            angle = torch.arange(0, 1, 1/num)
+            abs = torch.ones(num) 
+            self.labels = torch.ones(num)       
+        else:
+            angle = torch.zeros((num, max_nfft))
+            abs = torch.ones((num, max_nfft))
+            for i in range(num):
+                nfft = torch.randint(min_nfft, max_nfft, (1,))
+                angle[i,0:nfft] = torch.linspace(0, 1, nfft.item())
+                abs[i,nfft:] = 0
+            self.labels = torch.ones((num, max_nfft))
+        
         self.input = torch.polar(abs, angle * np.pi)
-        self.labels = torch.ones((num, max_nfft))
+        
         self.input = self.input.to(device)
         self.labels = self.labels.to(device)
         
@@ -27,8 +35,12 @@ class Dataset(torch.utils.data.Dataset):
     
     def __getitem__(self, index):
         # select sample
-        y = self.labels[index,:]
-        x = self.input[index,:]
+        if self.sparse:
+            y = self.labels[index]
+            x = self.input[index]          
+        else:
+            y = self.labels[index,:]
+            x = self.input[index,:]
         
         return x, y
 
