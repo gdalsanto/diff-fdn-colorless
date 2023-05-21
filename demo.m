@@ -143,8 +143,19 @@ for typeCell = types
     losses.(type) = asyPLoss(abs(h)-mean(abs(h)), ones(size(h)));
 end
 legend(types)
-title('Modal excitation')
-xlabel('Residue Magnitude (dB)')
+title('Magnitude response')
+xlabel('Magnitude (dB)')
 ylabel('Number of Occurence')
 
-
+% stft 
+figure(); hold on; grid on;
+for typeCell = types 
+    type = typeCell{1};
+    [S,f,t] = stft(ir.(type), fs);
+    SdB = db(S) - mean(db(S));
+    histogram(SdB,'FaceAlpha',0.1,'BinWidth',1)
+end
+legend(types)
+title('STFT magnitude')
+xlabel('Magnitude (dB)')
+ylabel('Number of Occurence')
