@@ -5,6 +5,7 @@ import torch
 import torch.nn as nn
 import torch.nn.utils.parametrize as parametrize 
 from utility import *
+import torch.autograd.profiler as profiler
 
 class Skew(nn.Module):
     def forward(self, X):
@@ -58,16 +59,20 @@ class DiffFDN(nn.Module):
         m = self.m * self.mStd + self.mAvr 
         D = torch.diag_embed(torch.unsqueeze(x, dim=-1) ** m)
         Gamma = torch.diag(self.gain_per_sample**m)
-        Hchannel = torch.matmul(torch.inverse(D - torch.matmul(A,Gamma)), B)
+        with profiler.record_function("TF SPECTRAL"):
+            Hchannel = torch.matmul(torch.inverse(D - torch.matmul(A,Gamma)), B)
         H = Hchannel.squeeze()*C.squeeze()  
         H_mask = torch.ones((torch.sum(H, dim=-1)).size())
         H_mask[(x == 0).squeeze()] = 0 # pad on the right side 
         param = (A.detach(), B.detach(), C.detach(), Gamma.detach(), m.detach())
         if self.sparse:
-            h = self.compute_ir(48000*2, param)
+            with profiler.record_function("TF TEMPORAL + IFFT SPARSE"):
+                h = self.compute_ir(48000*2, param)
         else:
-            h = torch.fft.irfft(torch.mul(torch.sum(H, dim=-1),H_mask), n=48000*8)
-            h = h/torch.max(torch.abs(h))
+            with profiler.record_function("IFFT DENSE"):
+                h = torch.fft.irfft(torch.mul(torch.sum(H, dim=-1),H_mask), n=48000*8)
+                h = h/torch.max(torch.abs(h))
+
         return H, h, param
 
     def print(self):

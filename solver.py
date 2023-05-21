@@ -16,6 +16,7 @@ import torchaudio
 import os
 import uuid
 import shutil
+import torch.autograd.profiler as profiler
 
 import config
 from utility import * 
@@ -108,7 +109,11 @@ for epoch in range(config.max_epochs):
         # batch processing
         inputs, labels = data 
         optimizer.zero_grad()
-        H, h, param = net(inputs)
+        with profiler.profile(with_stack=True, profile_memory=True) as prof:
+            H, h, param = net(inputs)
+        
+        print(prof.key_averages(group_by_input_shape=True).table(sort_by="cpu_time_total"))
+
         loss = criterionFreq(H, labels) + config.beta*criterionFreqGlob(H, labels, config.is_global) + config.alpha*criterionTime(h, torch.ones(480000))
         
         epoch_loss += loss.item()
