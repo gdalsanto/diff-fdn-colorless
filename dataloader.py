@@ -9,7 +9,7 @@ class Dataset(torch.utils.data.Dataset):
     points along the unit circle '''
     def __init__(self, num, min_nfft, max_nfft, device):
         # num: number of input pairs
-
+        self.sparse = False
         if min_nfft == max_nfft:
             # sparse sampling 
             self.sparse = True
