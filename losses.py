@@ -9,14 +9,16 @@ import config
 
 
 class asy_p_loss(nn.Module):
-    '''Means squared error between abs(x1) and x2'''
+    '''Mean squared error between abs(x1) and x2'''
     def forward(self, y_pred, y_true, is_global=False):
         loss = 0.0
-        if is_global:
-            y_pred = torch.sum(y_pred, dim=-1)
-            y_pred = torch.reshape(y_pred, (y_pred.size()[0], 1))
+
         if len(y_pred.size()) == 2:
             y_pred = y_pred.expand(1,-1,-1) 
+        if is_global:
+            y_pred = torch.sum(y_pred, dim=-1)
+            y_pred = torch.reshape(y_pred, (y_pred.size()[0], y_pred.size()[1], 1))
+
 
         for i in range(y_pred.size(dim=-1)):
             gT = 2*torch.ones((y_pred.size(0),y_pred.size(1)))
