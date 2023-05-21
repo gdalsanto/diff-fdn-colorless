@@ -10,7 +10,7 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 addpath(genpath('utilities'))
-results_date = ['20230419-094709'];
+results_date = ['20230508-123343'];
 results_dir = fullfile('output',results_date);
 rng(13);
 mkdir(fullfile(results_dir,'ir'))
@@ -23,10 +23,9 @@ types = {'DiffFDN','initDiffFDN','random'};
 
 
 %% construct FDNs 
-RT = 1.44*2;        % reverberation time (s)
+RT = 1.44*4;        % reverberation time (s)
 g = 10^(-3/fs/RT);  % gain per sample   (linear)
-g = 0.9999 ; 
-delays =  [809., 877., 937., 1049., 1151., 1249., 1373., 1499.];
+delays = [809., 877., 937., 1049., 1151., 1249., 1373., 1499.];
 % attenuaton matrix
 Gamma = diag(g.^delays);
 N = length(delays); 
@@ -143,8 +142,20 @@ for typeCell = types
     losses.(type) = asyPLoss(abs(h)-mean(abs(h)), ones(size(h)));
 end
 legend(types)
-title('Modal excitation')
-xlabel('Residue Magnitude (dB)')
+title('Magnitude response')
+xlabel('Magnitude (dB)')
 ylabel('Number of Occurence')
 
+% stft 
+figure(); hold on; grid on;
+for typeCell = types 
+    type = typeCell{1};
+    [S,f,t] = stft(ir.(type), fs);
+    SdB = db(S) - mean(db(S));
+    histogram(SdB,'FaceAlpha',0.1,'BinWidth',1)
+end
+legend(types)
+title('STFT magnitude')
+xlabel('Magnitude (dB)')
+ylabel('Number of Occurence')
 
