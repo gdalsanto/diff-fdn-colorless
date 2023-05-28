@@ -16,37 +16,31 @@ class MatrixExponential(nn.Module):
 
 class DiffFDN(nn.Module):
     # recursive neural netwrok 
-    def __init__(self, N, gain_per_sample, delays, device):
+    def __init__(self, delays, gain_per_sample, device):
         super().__init__()
         self.device = device
         # input parameters
-        self.N = N  # size of the FDN 
         self.gain_per_sample = gain_per_sample
-        # learnable parameters
-        self.B = nn.Parameter(torch.randn(1,N,1)/N)
-        self.C = nn.Parameter(torch.randn(1,1,N)/N)
 
-        if delays == 'init':
-            delaysVal = torch.tensor([809., 877., 937., 1049., 1151., 1249., 1373., 1499.])
-            self.mStd = torch.std(delaysVal)
-            self.mAvr = torch.mean(delaysVal)
-            delaysVal = (delaysVal - self.mAvr)/self.mStd 
-            self.m = nn.Parameter(delaysVal)
-        elif isinstance(delays, (list)):
+        if isinstance(delays, (list)):
             self.m = torch.tensor(delays).squeeze()
             self.mStd = torch.std(self.m)
             self.mAvr = torch.mean(self.m)
             self.m = (self.m - self.mAvr)/self.mStd 
+            self.N = len(delays) # size of the FDN 
         else:
-            raise ValueError('Value for third argument is not valid')
+            raise ValueError('Value for delay line lengths is not valid')
 
+        # learnable parameters
+        self.B = nn.Parameter(torch.randn(1,self.N,1)/self.N)
+        self.C = nn.Parameter(torch.randn(1,1,self.N)/self.N)
         # feedback matrix
-        self.A = nn.Linear(N,N)
+        self.A = nn.Linear(self.N,self.N)
         # save parametetrization for orthogonality 
         parametrize.register_parametrization(self.A, "weight", Skew())
         parametrize.register_parametrization(self.A, "weight", MatrixExponential())
         X = self.A.weight
-        print(torch.dist(X.T @ X, torch.eye(N)))
+        print(torch.dist(X.T @ X, torch.eye(self.N)))
         
     def forward(self, x):
         # output system's impulse response h and channels' frequency response

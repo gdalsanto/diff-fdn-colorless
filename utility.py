@@ -37,10 +37,9 @@ def get_frequency_samples(num):
     return torch.polar(abs, angle * np.pi)    
 
 def save_output(net, 
-                output_dir = 'output',
+                path_dir,
                 save_audio = False,
-                samplerate = 48000,
-                config_filename = 'config.py'):
+                samplerate = 48000,):
     '''
     create output directory and save FDN parameters from FDN() network and config file
     Args    net (nn.Module): trained FDN() network
@@ -52,17 +51,14 @@ def save_output(net,
             filename (string): filename of the audiofile if save_audio=True, None otherwise
     '''
     # create output folder
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-        
-    full_output_dir = os.path.join(output_dir, time.strftime("%Y%m%d-%H%M%S"))
-    os.makedirs(full_output_dir)
+    if not os.path.exists(path_dir):
+        os.makedirs(path_dir)
+        path_dir = os.path.join('output', time.strftime("%Y%m%d-%H%M%S"))
+        os.makedirs(path_dir)
 
-    # save config file
-    shutil.copy(config_filename,os.path.join(full_output_dir, 'config.py'))
 
     # save parameters
-    param, _ = save_parametes(net, full_output_dir)
+    param, _ = save_parametes(net, path_dir, filename='parameters.mat')
 
     filename = None
     if save_audio:
@@ -71,13 +67,13 @@ def save_output(net,
         h_norm = h / torch.norm(h)
         # save outputs
         unique_str = str(uuid.uuid4())
-        filename = os.path.join(full_output_dir, unique_str+'_output.wav')
+        filename = os.path.join(path_dir, unique_str+'_output.wav')
         torchaudio.save(filename,
                         torch.stack((h_norm.squeeze(0),h_norm.squeeze(0)),1).detach().cpu().numpy(),
                         samplerate,
                         bits_per_sample=32,
                         channels_first=False)
-    return full_output_dir, param, filename
+    return path_dir, param, filename
 
 def fdn2dir(net):
     '''
@@ -93,16 +89,17 @@ def fdn2dir(net):
     d['N'] = net.N
     return d
 
-def save_parametes(net, output_dir, filename='parameters.mat'):
+def save_parametes(net, dir_path, filename):
     '''
     save parameters of FDN() net to .mat file 
     Args    net (nn.Module): trained FDN() network
-            output_dir (string): path to output firectory
+            dir_path (string): path to output firectory
+            filename (string): name of the file 
     Output  param (dictionary of tensors): FDN() net parameters
             param_np (dictionary of numpy arrays): FDN() net parameters
     '''
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)   
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)   
     
     param = fdn2dir(net)
     param_np = {}
@@ -124,7 +121,7 @@ def save_parametes(net, output_dir, filename='parameters.mat'):
         param_np['m'] = net.m.squeeze().cpu().numpy()  
 
     # save parameters in numpy format 
-    scipy.io.savemat(os.path.join(output_dir,filename),
+    scipy.io.savemat(os.path.join(dir_path, filename),
                      param_np)
     return param, param_np
 
