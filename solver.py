@@ -155,7 +155,7 @@ def train(args, train_dataset, valid_dataset):
     h_norm = torch.div(h, torch.max(torch.abs(h)))
     filename = os.path.join(args.train_dir,'ir.wav')
     torchaudio.save(filename,
-                    torch.stack((h_norm.squeeze(0),h_norm.squeeze(0)),1),
+                    torch.stack((h_norm.squeeze(0),h_norm.squeeze(0)),1).cpu(),
                     48000,
                     bits_per_sample=32,
                     channels_first=False)
