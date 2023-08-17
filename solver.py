@@ -108,7 +108,7 @@ def train(args, train_dataset, valid_dataset):
             inputs, labels = data 
             optimizer.zero_grad()
             H, h, param = net(inputs)
-            loss = criterionFreq(H, labels) + args.alpha*criterionTime(torch.abs(h), torch.ones(480000))
+            loss = criterionFreq(H, labels) + args.alpha*criterionTime(torch.abs(h), torch.ones(h.size(-1)))
 
             epoch_loss += loss.item()
             loss.backward()

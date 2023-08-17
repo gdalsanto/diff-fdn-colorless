@@ -54,7 +54,7 @@ class DiffFDN(nn.Module):
         H = Hchannel.squeeze()*C.squeeze()  
         H_mask = torch.ones((torch.sum(H, dim=-1)).size())
         H_mask[(x == 0).squeeze()] = 0 # pad on the right side 
-        h = torch.fft.irfft(torch.mul(torch.sum(H, dim=-1),H_mask), n=48000*8)
+        h = torch.fft.irfft(torch.mul(torch.sum(H, dim=-1),H_mask), norm='ortho')
         h = h/torch.max(torch.abs(h))
         param = (A.detach(), B.detach(), C.detach(), Gamma.detach(), m.detach())
         return H, h, param
