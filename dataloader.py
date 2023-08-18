@@ -1,6 +1,7 @@
 # dataset and dataloader colorless fdn
 
 import torch
+from tqdm import trange
 import numpy as np 
 import torch.utils.data as data
 
@@ -12,7 +13,7 @@ class Dataset(torch.utils.data.Dataset):
 
         angle = torch.zeros((num, max_nfft))
         abs = torch.ones((num, max_nfft))
-        for i in range(num):
+        for i in trange(num, desc='Generating dataset'):
             nfft = torch.randint(min_nfft, max_nfft, (1,))
             angle[i,0:nfft] = torch.linspace(0, 1, nfft.item())
             abs[i,nfft:] = 0

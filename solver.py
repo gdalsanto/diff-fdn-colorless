@@ -19,6 +19,7 @@ import shutil
 import argparse
 import sys
 import glob
+from tqdm import trange, tqdm
 
 from utility import * 
 from dataloader import split_dataset, get_dataloader, Dataset
@@ -99,11 +100,11 @@ def train(args, train_dataset, valid_dataset):
     st = time.time()     
 
     # ----------- TRAINING LOOP
-    for epoch in range(args.max_epochs):
+    for epoch in trange(args.max_epochs, desc='Training'):
         epoch_loss = 0
         st_epoch = time.time()
 
-        for i, data in enumerate(train_dataset):
+        for i, data in enumerate(valid_dataset):
             # batch processing
             inputs, labels = data 
             optimizer.zero_grad()
