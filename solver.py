@@ -28,7 +28,7 @@ from models import DiffFDN
 
 def set_device(device):
     if (device == 'cuda') & torch.cuda.is_available():
-        torch.set_default_tensor_type(torch.cuda.DoubleTensor)
+        torch.set_default_tensor_type(torch.cuda.FloatTensor)
     else:
         device = 'cpu'
     return device
