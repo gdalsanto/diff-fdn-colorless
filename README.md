@@ -8,8 +8,10 @@ Artificial reverberation algorithms often suffer from spectral coloration, usual
 ## Getting started 
 To install the required packages using conda environments open the terminal at the repo directory and run the following command
 ```
-conda env create -f colorless-fdn.yml
+conda env create -f diff-colorless-fdn-gpu.yml
 ```
+Alternatively, use the CPU compatible environement `diff-colorless-fdn.yml`  
+
 The optimization is coded in Pytorch. Set the configuration parameters in `config.py` and launch the training by running `solver.py`. The initial and optimized parameters values are saved in `output/.`.
 
 The repository also contains a MATLAB demo `demo.m` that shows how to load the model parameters in matlab and uses Sebastian Schlecht's [fdnToolbox](https://github.com/SebastianJiroSchlecht/fdnToolbox) to compute the impulse response and modal decomposition. 
