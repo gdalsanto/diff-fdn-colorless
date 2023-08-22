@@ -54,6 +54,11 @@ def load_dataset(args):
     )
     return train_loader, valid_loader 
 
+def get_response(x, net):
+    H, h, _= net(x)    
+    H = torch.sum(H, dim=-1)
+    return H, h
+    
 def train(args, train_dataset, valid_dataset):
     # initialize network 
     net = DiffFDN(args.delays, args.gain_per_sample, args.device)
