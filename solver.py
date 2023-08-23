@@ -58,7 +58,7 @@ def get_response(x, net):
     H, h, _= net(x)    
     H = torch.sum(H, dim=-1)
     return H, h
-    
+
 def train(args, train_dataset, valid_dataset):
     # initialize network 
     net = DiffFDN(args.delays, args.gain_per_sample, args.device)
@@ -109,7 +109,7 @@ def train(args, train_dataset, valid_dataset):
         epoch_loss = 0
         st_epoch = time.time()
 
-        for i, data in enumerate(valid_dataset):
+        for i, data in enumerate(train_dataset):
             # batch processing
             inputs, labels = data 
             optimizer.zero_grad()
