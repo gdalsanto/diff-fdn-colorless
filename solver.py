@@ -142,6 +142,11 @@ def train(args, train_dataset, valid_dataset):
             valid_loss=valid_loss, 
             time=et_epoch-st_epoch)
         print(to_print)
+        if args.log_epochs:
+            torch.save(
+                net.state_dict(), 
+                os.path.join(args.train_dir, 'model_e' + str(epoch) + '.pt'))          
+
 
     # end time 
     et = time.time()    
@@ -193,6 +198,8 @@ if __name__ == '__main__':
         help='batch size')
     parser.add_argument('--max_epochs', type=int, default=15, 
         help='maximum number of training epochs')
+    parser.add_argument('--log_epochs', action='store_true',
+        help='Store met parameters at every epoch')
     # optimizer 
     parser.add_argument('--lr', type=float, default=1e-3,
         help='learning rate')
