@@ -39,8 +39,8 @@ class DiffFDN(nn.Module):
         # save parametetrization for orthogonality 
         parametrize.register_parametrization(self.A, "weight", Skew())
         parametrize.register_parametrization(self.A, "weight", MatrixExponential())
-        X = self.A.weight
-        print(torch.dist(X.T @ X, torch.eye(self.N)))
+        # X = self.A.weight
+        # print(torch.dist(X.T @ X, torch.eye(self.N)))
         
     def forward(self, x):
         # output system's impulse response h and channels' frequency response
