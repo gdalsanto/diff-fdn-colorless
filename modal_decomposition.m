@@ -10,8 +10,8 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 addpath(genpath('utilities'))
-results_date = ['20230419-094709'];
-results_dir = fullfile('output',results_date);
+results_date = ['pretrained'];
+results_dir = fullfile('demo',results_date);
 rng(13);
 mkdir(fullfile(results_dir,'ir'))
 
@@ -108,6 +108,9 @@ end
 
 %% plots 
 % mode excitation
+save(fullfile(results_dir, 'poles.mat'), 'poles')
+save(fullfile(results_dir, 'residues.mat'), 'residues')
+
 figure(); hold on; grid on;
 for typeCell = types
     type = typeCell{1};
