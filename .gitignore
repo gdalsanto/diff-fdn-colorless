@@ -3,3 +3,4 @@ __pycache__/
 *.asv 
 /output
 config_*.py
+/dump
