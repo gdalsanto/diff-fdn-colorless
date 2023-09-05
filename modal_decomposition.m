@@ -10,7 +10,7 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 addpath(genpath('utilities'))
-results_date = ['pretrained'];
+results_date = ['pretrained01'];
 results_dir = fullfile('demo',results_date);
 rng(13);
 mkdir(fullfile(results_dir,'ir'))
@@ -26,7 +26,7 @@ types = {'DiffFDN','initDiffFDN','random'};
 RT = 1.44*2;        % reverberation time (s)
 g = 10^(-3/fs/RT);  % gain per sample   (linear)
 g = 0.9999 ; 
-delays =  [809., 877., 937., 1049., 1151., 1249., 1373., 1499.];
+delays =  [241.0, 263.0, 281.0, 293.0, 1193.0, 1319.0, 1453.0, 1597.0];
 % attenuaton matrix
 Gamma = diag(g.^delays);
 N = length(delays); 
