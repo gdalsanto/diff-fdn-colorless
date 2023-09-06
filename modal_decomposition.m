@@ -10,7 +10,7 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 addpath(genpath('utilities'))
-results_date = ['pretrained01'];
+results_date = ['pretrained04'];
 results_dir = fullfile('demo',results_date);
 rng(13);
 mkdir(fullfile(results_dir,'ir'))
@@ -19,7 +19,7 @@ mkdir(fullfile(results_dir,'ir'))
 fs = 48000;         % sampling frequency
 fbin = fs * 10;     % number of frequency bin
 irLen = fs*2;       % ir length   
-types = {'DiffFDN','initDiffFDN','random'};
+types = {'DiffFDN','initDiffFDN','random', 'Hadamard', 'Householder', 'diagonal'};
 
 
 %% construct FDNs 
