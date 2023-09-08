@@ -20,8 +20,7 @@ The repository also contains a Pytorch demo of the optimzation framework (`dafx2
 
 ## References
 Audio demos are published in: [Differentiable Feedback Delay Network for Colorless Reverberationg](http://research.spa.aalto.fi/publications/papers/dafx23-colorless-fdn/).  
-The paper is available [online](https://www.researchgate.net/publication/373756296_Differentiable_Feedback_Delay_Network_For_Colorless_Reverberation). 
-If you would like to use this code, please cite the related DAFx conference paper (submitted) using the following reference:
+If you would like to use this code, please cite the related [DAFx conference paper](https://www.researchgate.net/publication/373756296_Differentiable_Feedback_Delay_Network_For_Colorless_Reverberation) using the following reference:
 ```
 Dal Santo Gloria, Karolina Prawda, Sebastian J. Schlecht, and Vesa Välimäki. "Differentiable Feedback Delay Network for colorless reverberation." International Conference on Digital Audio Effects (DAFx23), Copenhagen, Denmark, Sept. 4-7 2023 
 ```
