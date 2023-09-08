@@ -1,5 +1,8 @@
 # diff-fdn-colorless
 Demo for the differentiable feedback delay network (FDN) for colorless reverberation submitted to the 26th International Conference on Digital Audio Effects (DAFx 2023). 
+<p align="center">
+  <img width="400" src=".\demo\diffFDN_blockdiagram.png">
+</p>
 ## Overview 
 In this work we introduce an optimization framework to tune a set of FDN parameters (feedback matrix, input gains, and output gains) to achieve a smoother and less colored reverberation. 
 ## Abstract 
