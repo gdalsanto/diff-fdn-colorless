@@ -117,8 +117,8 @@ def save_parametes(net, dir_path, filename):
         except AttributeError:
             param_np[name] = value
     if ('m' not in param_np):
-        param['m'] = net.m    
-        param_np['m'] = net.m.squeeze().cpu().numpy()  
+        param['m'] = net.m * net.mStd + net.mAvr     
+        param_np['m'] = ( net.m * net.mStd + net.mAvr ).squeeze().cpu().numpy()  
 
     # save parameters in numpy format 
     scipy.io.savemat(os.path.join(dir_path, filename),
