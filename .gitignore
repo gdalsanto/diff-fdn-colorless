@@ -6,3 +6,5 @@ config_*.py
 /dump
 /data
 /runs
+/mushra
+.vscode
