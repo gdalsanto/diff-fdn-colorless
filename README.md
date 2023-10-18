@@ -1,5 +1,8 @@
 # diff-fdn-colorless
 Demo for the differentiable feedback delay network (FDN) for colorless reverberation submitted to the 26th International Conference on Digital Audio Effects (DAFx 2023). 
+<p align="center">
+  <img width="400" src=".\demo\diffFDN_blockdiagram.png">
+</p>
 ## Overview 
 In this work we introduce an optimization framework to tune a set of FDN parameters (feedback matrix, input gains, and output gains) to achieve a smoother and less colored reverberation. 
 ## Abstract 
@@ -14,11 +17,13 @@ Alternatively, use the CPU compatible environement `diff-colorless-fdn.yml`
 
 The optimization is coded in Pytorch. Set the configuration parameters in `config.py` and launch the training by running `solver.py`. The initial and optimized parameters values are saved in `output/.`.
 
-The repository also contains a MATLAB demo `demo.m` that shows how to load the model parameters in matlab and uses Sebastian Schlecht's [fdnToolbox](https://github.com/SebastianJiroSchlecht/fdnToolbox) to compute the impulse response and modal decomposition. 
+## Demo 
+The repository also contains a Pytorch demo of the optimzation framework (`dafx23_demo.ipynb`) and MATLAB demo for the modal decomposition of FDNs (`modal_decomposition.m`). The latter uses Sebastian Schlecht's [fdnToolbox](https://github.com/SebastianJiroSchlecht/fdnToolbox) to compute the impulse response and modal decomposition of the FDNs used during training.  
+
 
 ## References
 Audio demos are published in: [Differentiable Feedback Delay Network for Colorless Reverberationg](http://research.spa.aalto.fi/publications/papers/dafx23-colorless-fdn/).  
-If you would like to use this code, please cite the related DAFx conference paper (submitted) using the following reference:
+If you would like to use this code, please cite the related [DAFx conference paper](https://www.researchgate.net/publication/373756296_Differentiable_Feedback_Delay_Network_For_Colorless_Reverberation) using the following reference:
 ```
 Dal Santo Gloria, Karolina Prawda, Sebastian J. Schlecht, and Vesa Välimäki. "Differentiable Feedback Delay Network for colorless reverberation." International Conference on Digital Audio Effects (DAFx23), Copenhagen, Denmark, Sept. 4-7 2023 
 ```
