@@ -104,6 +104,11 @@ def train(args, train_dataset, valid_dataset):
     # training start time
     st = time.time()     
 
+    if args.log_epochs:
+        torch.save(
+            net.state_dict(), 
+            os.path.join(args.train_dir, 'model_init.pt'))   
+            
     # ----------- TRAINING LOOP
     for epoch in trange(args.max_epochs, desc='Training'):
         epoch_loss = 0
