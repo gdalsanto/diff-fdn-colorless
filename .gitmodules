@@ -1,0 +1,3 @@
+[submodule "fdnToolbox"]
+	path = fdnToolbox
+	url = https://github.com/SebastianJiroSchlecht/fdnToolbox.git
