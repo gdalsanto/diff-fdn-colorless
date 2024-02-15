@@ -1,3 +1,6 @@
 [submodule "fdnToolbox"]
 	path = fdnToolbox
 	url = https://github.com/SebastianJiroSchlecht/fdnToolbox.git
+[submodule "DecayFitNet"]
+	path = DecayFitNet
+	url = https://github.com/georg-goetz/DecayFitNet.git
