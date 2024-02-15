@@ -7,7 +7,7 @@ from DecayFitNet.python.toolbox.core import discard_last_n_percent, decay_model,
 from DecayFitNet.python.toolbox.BayesianDecayAnalysis import BayesianDecayAnalysis
 
 
-def getEDCparam(rir, filter_frequencies, n_slopes = 1, sr=48000):
+def getEDCparam(rir, filter_frequencies, n_slopes = 1, sr=48000, device='cpu'):
     '''
     Using DecayFitNet, extract EDC parameters A, T, C 
     The RIR onset time is detected 
@@ -40,7 +40,8 @@ def getEDCparam(rir, filter_frequencies, n_slopes = 1, sr=48000):
                                         torch.from_numpy(estimated_parameters_decayfitnet[2]),
                                         time_axis=time_axis,
                                         compensate_uli=True,
-                                        backend='torch')
+                                        backend='torch',
+                                        device=device)
     # Discard last 5% for MSE evaluation
     true_edc = discard_last_n_percent(true_edc, 5)
     fitted_edc_decayfitnet = discard_last_n_percent(fitted_edc_decayfitnet, 5)
@@ -73,7 +74,7 @@ def decayFitNet2InitialLevel(T, A, N, normalization, fs, rirLen, fBands):
     # The rirLen factor is due to the normalization in schroederInt (in DecayFitNet)
     return level, A, N
 
-def get_fdn_EDCparam(rir, f_bands, n_slopes, sr):
+def get_fdn_EDCparam(rir, f_bands, n_slopes, sr, device):
     ''' Use DecayFitNet to extract the EDC parameters to be used in FDN design 
     args:
         rir (array):    input room impulse response
@@ -84,7 +85,7 @@ def get_fdn_EDCparam(rir, f_bands, n_slopes, sr):
     '''
 
     # extract EDC parameters
-    edc_param, norm_vals, _ = getEDCparam(rir, f_bands, n_slopes = n_slopes, sr=sr)
+    edc_param, norm_vals, _ = getEDCparam(rir, f_bands, n_slopes = n_slopes, sr=sr, device=device)
     T, A, N = edc_param[0], edc_param[1], edc_param[2]
     # convert decayFitNet estimation to initial level as used in FDNs
     level, A, N = decayFitNet2InitialLevel(T, A, N, norm_vals, sr, len(rir), f_bands)

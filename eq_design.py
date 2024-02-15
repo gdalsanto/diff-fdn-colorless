@@ -37,7 +37,7 @@ class FilterDesigner:
         
         if self.method == 'DecayFitNet':
             assert self.octave == 1, 'DecayFitNet supports only one octave-band filters'
-            self.T, self.A, self.N, self.level = get_fdn_EDCparam(rir, self.f_bands, self.n_slopes, sr)
+            self.T, self.A, self.N, self.level = get_fdn_EDCparam(rir, self.f_bands, self.n_slopes, sr, self.net.device)
         elif self.method == 'BDA':
             self.T, self.A, self.N, self.level = get_BDA_param(rir, self.f_bands, self.n_slopes, sr)
         else:
