@@ -1,31 +1,34 @@
-# diff-fdn-colorless
-Companion conde the the Feedback Delay Network Optimization paper submitted for EURASIP Journal on Audio, Speech, and Music Processing, special issue on Digital Audio Effects. This is an extension to our previous work, which you can find in the branch `dafx23` of this repository. 
-Main updates form the previous framework:
- for the differentiable feedback delay network (FDN) for colorless reverberation submitted to the 26th International Conference on Digital Audio Effects (DAFx 2023). 
-<p align="center">
-  <img width="400" src=".\demo\diffFDN_blockdiagram.png">
-</p>
-## Overview 
-In this work we introduce an optimization framework to tune a set of FDN parameters (feedback matrix, input gains, and output gains) to achieve a smoother and less colored reverberation. 
-## Abstract 
-Artificial reverberation algorithms often suffer from spectral coloration, usually in the form of metallic ringing, which impairs the perceived quality of sound. This paper proposes a method to reduce the coloration in the feedback delay network (FDN), a popular artificial reverberation algorithm. An optimization framework is employed entailing a differentiable FDN to learn a set of parameters decreasing coloration. The optimization objective is to minimize the spectral loss to obtain a flat magnitude response, with an additional temporal loss term to control the sparseness of the impulse response. The objective evaluation of the method shows a favorable narrower distribution of modal excitation while retaining the impulse response density. The subjective evaluation demonstrates that the proposed method lowers perceptual coloration of late reverberation, and also shows that the suggested optimization improves sound quality for small FDN sizes. The method proposed in this work constitutes an improvement in the design of accurate and high-quality artificial reverberation, simultaneously offering computational savings.
+# diff-fdn-colorless  
+In this work we introduce an optimization framework to tune a set of Feedback Delay Network (FDN) parameters (feedback matrix, input gains, and output gains) to achieve a smoother and less colored reverberation. 
 
+This is the companion code to the **Feedback Delay Network Optimization** paper submitted for EURASIP Journal on Audio, Speech, and Music Processing, special issue on Digital Audio Effects [1].  
+This is an extension to our previous work, which you can find in the branch `dafx23` of this repository and documented in the relative DAFx paper [2].  
+
+Main updates from the previous framework:
+* Faster training, we now concentrate solely on the frequency domain
+* Support for scattering feedback matrix optimization, for improved temporal density
+* Support for Householder feedback matrix optimization, for reduced computational costs
+* Synthesis of real RIR using DecayFitNet to design attenuation and tone control filters
+  
 ## Getting started 
+When cloning this repository, make sure to clone all the submodules, namely [fdnToolbox](https://github.com/SebastianJiroSchlecht/fdnToolbox) and [DecayFitNet](https://github.com/georg-goetz/DecayFitNet/tree/01daf3e7bbfd637aa1269bbca0cab7f445db0d5d), by running
+```
+git clone --recurse-submodules git@github.com:gdalsanto/diff-fdn-colorless.git
+```
 To install the required packages using conda environments open the terminal at the repo directory and run the following command
 ```
 conda env create -f diff-colorless-fdn-gpu.yml
 ```
 Alternatively, use the CPU compatible environement `diff-colorless-fdn.yml`  
 
-The optimization is coded in Pytorch. Set the configuration parameters in `config.py` and launch the training by running `solver.py`. The initial and optimized parameters values are saved in `output/.`.
-
+The optimization is coded in PyTorch. Run the `solver.py` file to launch training, the delay lines lengths must be given as arguments for the code to run. Check `solver.py` for the complete list of arguments. The initial and optimized parameters values are saved in `output/.`.  
 ## Demo 
-The repository also contains a Pytorch demo of the optimzation framework (`dafx23_demo.ipynb`) and MATLAB demo for the modal decomposition of FDNs (`modal_decomposition.m`). The latter uses Sebastian Schlecht's [fdnToolbox](https://github.com/SebastianJiroSchlecht/fdnToolbox) to compute the impulse response and modal decomposition of the FDNs used during training.  
+The MATLAB demo code `inference.m` shows how to load the optimized FDN parameters on Sebastian Schlecht's [fdnToolbox](https://github.com/SebastianJiroSchlecht/fdnToolbox) 
 
 
 ## References
-Audio demos are published in: [Differentiable Feedback Delay Network for Colorless Reverberation](http://research.spa.aalto.fi/publications/papers/dafx23-colorless-fdn/).  
-If you would like to use this code, please cite the related [DAFx conference paper](https://www.researchgate.net/publication/373756296_Differentiable_Feedback_Delay_Network_For_Colorless_Reverberation) using the following reference:
+Audio demos are published in: [Feedback Delay Network Optimization](http://research.spa.aalto.fi/publications/papers/eurasip-colorless-fdn/).  
 ```
-Dal Santo Gloria, Karolina Prawda, Sebastian J. Schlecht, and Vesa Välimäki. "Differentiable Feedback Delay Network for colorless reverberation." International Conference on Digital Audio Effects (DAFx23), Copenhagen, Denmark, Sept. 4-7 2023 
+[1] Dal Santo G., Prawda K., Schlecht S. J., and Välimäki V., "Feedback Delay Network Optimization." in EURASIP Journal on Audio, Speech, and Music Processing - sumbitted for reviews on 31.01.2024
+[2] Dal Santo G., Prawda K., Schlecht S. J., and Välimäki V., "Differentiable Feedback Delay Network for colorless reverberation." in the 26th International Conference on Digital Audio Effects (DAFx23), Copenhagen, Denmark, Sept. 4-7 2023 
 ```
