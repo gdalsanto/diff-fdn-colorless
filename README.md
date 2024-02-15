@@ -1,5 +1,7 @@
 # diff-fdn-colorless
-Demo for the differentiable feedback delay network (FDN) for colorless reverberation submitted to the 26th International Conference on Digital Audio Effects (DAFx 2023). 
+Companion conde the the Feedback Delay Network Optimization paper submitted for EURASIP Journal on Audio, Speech, and Music Processing, special issue on Digital Audio Effects. This is an extension to our previous work, which you can find in the branch `dafx23` of this repository. 
+Main updates form the previous framework:
+ for the differentiable feedback delay network (FDN) for colorless reverberation submitted to the 26th International Conference on Digital Audio Effects (DAFx 2023). 
 <p align="center">
   <img width="400" src=".\demo\diffFDN_blockdiagram.png">
 </p>
