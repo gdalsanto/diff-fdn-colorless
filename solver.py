@@ -9,7 +9,7 @@ from model import DiffFDN
 from trainer import Trainer
 from eq_design import FilterDesigner
 
-def main(args, train_dataset, valid_sataset):
+def main(args, train_dataset, valid_dataset):
     # initialize network 
     net = DiffFDN(args.delays, args.gain_per_sample, args.device, args.scattering)
     # parameters initialization 
@@ -31,7 +31,7 @@ def main(args, train_dataset, valid_sataset):
     with torch.no_grad():
         if args.reference_ir:
             # design filter form reference IR
-            filter_designer = FilterDesigner(trainer.net, args.reference_ir)
+            filter_designer = FilterDesigner(trainer.net, args.reference_ir, octave=args.octave_bands, method=args.edc_est_method)
             filter_designer.run_designer()
 
             trainer.net.rir_synthesis = True
@@ -79,9 +79,13 @@ if __name__ == '__main__':
     # frequency-dependent attenuation 
     parser.add_argument('--reference_ir', type=str, default=None,
         help='filepath to the reference ir, used to design an attenuation filter for rt60 matching')
+    parser.add_argument('--edc_est_method', type=str, default='DecayFitNet', 
+        help='Method used for the estimation of the EDC curves. One between DecayFitNet and BDA (Bayesian Decay Analysis).')
+    parser.add_argument('--octave_bands', type=int, default=1, 
+        help='Number of bands in one octave. One between 1 and 3. NOTE, this is still under development.')
+    # scattering feedback matrix 
     parser.add_argument('--scattering', action='store_true', default=False,
         help='If true use te scattering FDN configuaration')
-
     args = parser.parse_args()
 
     # make output directory
