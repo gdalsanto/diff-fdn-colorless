@@ -57,7 +57,7 @@ class FilterDesigner:
             assert self.octave == 1, "Graphic EQ is supported only for 1 octave filters"
             self.T = np.pad(self.T, ((1,1), (0, 0)), 'edge')    # used by the shelving filters 
             # get absorption filter
-            G = absorptionGEQ(self.T, self.f_bands, self.net.m.numpy(), self.sr) # SOS 
+            G = absorptionGEQ(self.T, self.f_bands, self.net.m.cpu().numpy(), self.sr) # SOS 
             self.G_SOS = G / np.reshape(G[:,:,:,3], (len(self.net.m), 1, len(self.f_bands)+3, 1))   # a0 = 1
             # initial level filter, attenuate top and bottom bands
             target_level = mag2db(np.pad(self.level, ((1,1), (0, 0)), 'edge'))
