@@ -31,6 +31,7 @@ def main(args, train_dataset, valid_dataset):
     with torch.no_grad():
         if args.reference_ir:
             # design filter form reference IR
+            trainer.net.to('cpu')
             filter_designer = FilterDesigner(trainer.net, args.reference_ir, octave=args.octave_bands, method=args.edc_est_method)
             filter_designer.run_designer()
 
