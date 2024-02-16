@@ -39,7 +39,7 @@ def getEDCparam(rir, filter_frequencies, n_slopes = 1, sr=48000, device='cpu'):
     fitted_edc_decayfitnet = decay_model(torch.from_numpy(estimated_parameters_decayfitnet[0]).to(device),
                                         torch.from_numpy(estimated_parameters_decayfitnet[1]).to(device),
                                         torch.from_numpy(estimated_parameters_decayfitnet[2]).to(device),
-                                        time_axis=time_axis,
+                                        time_axis=time_axis.to(device),
                                         compensate_uli=True,
                                         backend='torch',
                                         device=device)
