@@ -7,8 +7,8 @@ This is an extension to our previous work, which you can find in the branch `daf
 Main updates from the previous framework:
 * Faster training, we now concentrate solely on the frequency domain
 * Support for scattering feedback matrix optimization, for improved temporal density
-* Support for Householder feedback matrix optimization, for reduced computational costs
 * Synthesis of real RIR using DecayFitNet to design attenuation and tone control filters
+* Support for Householder feedback matrix optimization, for reduced computational costs (not yet available in this repo)
   
 ## Getting started 
 When cloning this repository, make sure to clone all the submodules, namely [fdnToolbox](https://github.com/SebastianJiroSchlecht/fdnToolbox) and [DecayFitNet](https://github.com/georg-goetz/DecayFitNet/tree/01daf3e7bbfd637aa1269bbca0cab7f445db0d5d), by running
