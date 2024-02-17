@@ -6,26 +6,29 @@
     "configurations": [
         {
             "name": "Python: Current File",
-            "type": "python",
+            "type": "debugpy",
             "request": "launch",
             "program": "${file}",
             "console": "integratedTerminal",
             "justMyCode": true,
             "args": [
                 "--delays",
-                "809.",
-                "877.",
-                "937.",
-                "1049.", 
-                "1151.", 
-                "1249.", 
-                "1373.", 
-                "1499.",
+                "997.",
+                "1153.",
+                "1327.",
+                "1559.", 
+                "1801.", 
+                "2099.", 
                 "--max_epochs",
-                "1"
+                "2", 
+                "--octave_bands",
+                "3",
+                "--edc_est_method",
+                "DecayFitNet",
+                "--reference_ir",
+                "/Users/dalsag1/Dropbox (Aalto)/aalto/projects/project-colorlessFDN/git/diff-fdn-colorless/rirs/s3_r4_o.wav", 
             ]
 
-                
         }
         
     ]

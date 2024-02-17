@@ -3,9 +3,9 @@
 
 clear; clc; close all;
 
-addpath(genpath('fdnToolbox'))
+addpath(genpath('/Users/dalsag1/Dropbox (Aalto)/aalto/projects/analysis-synthesis-of-RIR/git/rir-analysis-synthesis/informed/fdnToolbox'))
 
-results_dir = "./output/20240214-152712";
+results_dir = "./output/20240217-123701";
 output_dir = fullfile(results_dir, 'matlab');
 
 %% Analyse reference RIR 

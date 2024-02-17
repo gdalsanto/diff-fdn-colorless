@@ -1,0 +1,14 @@
+__pycache__/
+.DS_Store
+*.asv 
+/output
+config_*.py
+/dump
+/data
+/runs
+/mushra
+.vscode
+.vscode/launch.json
+*.pyc
+ cd /Users/dalsag1/Dropbox\ \(Aalto\)/aalto/projects/project-colorlessFDN/git/diff-fdn-colorless ; /usr/bin/env /Users/dalsag1/miniconda3/envs/rir2fdn/bin/python /Users/dalsag1/.vscode/extensions/ms-python.debugpy-2024.0.0-darwin-arm64/bundled/libs/debugpy/adapter/../../debugpy/launcher 54140 -- /Users/dalsag1/Dropbox\ \(Aalto\)/aalto/projects/project-colorlessFDN/git/diff-fdn-colorless/solver.py --delays 997. 877. 937. 1049. 1151. 1249. 1373. 1499. --max_epochs 1 --reference_ir /Users/dalsag1/Dropbox\ \(Aalto\)/aalto/projects/project-colorlessFDN/git/diff-fdn-colorless/rirs/s3_r4_o.wav --edc_est_method BDA --octave_bands 3 
+

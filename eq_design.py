@@ -36,7 +36,7 @@ class FilterDesigner:
         rir = rir / np.linalg.norm(rir)        
         
         if self.method == 'DecayFitNet':
-            assert self.octave == 1, 'DecayFitNet supports only one octave-band filters'
+            # assert self.octave == 1, 'DecayFitNet supports only one octave-band filters'
             self.T, self.A, self.N, self.level = get_fdn_EDCparam(rir, self.f_bands, self.n_slopes, sr, self.net.device)
         elif self.method == 'BDA':
             self.T, self.A, self.N, self.level = get_BDA_param(rir, self.f_bands, self.n_slopes, sr)
@@ -46,22 +46,24 @@ class FilterDesigner:
     def get_center_freq(self):
         # TODO compute them for a given min ad max frequency
         if self.octave == 1:
-            self.f_bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]    
+            self.f_bands = [63, 125, 250, 500, 1000, 2000, 4000, 8000]   
+            self.correction = np.array([5, 0, 0, 0, 0, 0, 0, 0, 5, 30]) 
         elif self.octave == 3:
             self.f_bands = [63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000]
+            self.correction = np.array([5, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 5, 30])
         else:
             ValueError('Resolutions different form one or one-third octave bands are not supported at the moment')
         
     def get_filter(self):
         if self.filter == 'GEQ':
-            assert self.octave == 1, "Graphic EQ is supported only for 1 octave filters"
-            self.T = np.pad(self.T, ((1,1), (0, 0)), 'edge')    # used by the shelving filters 
+            # assert self.octave == 1, "Graphic EQ is supported only for 1 octave filters"
+            # self.T = np.pad(self.T, ((1,1), (0, 0)), 'edge')    # used by the shelving filters 
             # get absorption filter
-            G = absorptionGEQ(self.T, self.f_bands, self.net.m.cpu().numpy(), self.sr) # SOS 
+            G = absorptionGEQ(np.pad(self.T, ((1,1), (0, 0)), 'edge'), self.f_bands, self.net.m.cpu().numpy(), self.sr) # SOS 
             self.G_SOS = G / np.reshape(G[:,:,:,3], (len(self.net.m), 1, len(self.f_bands)+3, 1))   # a0 = 1
             # initial level filter, attenuate top and bottom bands
             target_level = mag2db(np.pad(self.level, ((1,1), (0, 0)), 'edge'))
-            target_level = target_level.squeeze() - np.array([5, 0, 0, 0, 0, 0, 0, 0, 5, 30])
+            target_level = target_level.squeeze() - self.correction
             self.TC_SOS = designGEQ(target_level, self.f_bands, self.sr)
 
     def run_designer(self):
