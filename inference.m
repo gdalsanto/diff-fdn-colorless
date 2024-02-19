@@ -21,7 +21,7 @@ if isfile(fullfile(results_dir, 'synthesis_filters.mat'))
 else
     % load RIR
     filename = "s3_r4_o";
-    rir = audioread('rir',filename + ".wav");
+    rir = audioread(fullfile('rirs',filename + ".wav"));
     rir = rir(:,1);
     [~,onset] = max(abs(rir));
     rir = rir(onset:end,:);
@@ -34,7 +34,7 @@ else
     % uploading a presetimated values 
     % net = DecayFitNetToolbox(nSlopes, fs, fBands(cInd));
     % est.T, est.A, est.N, est.norm] = net.estimateParameters(rir);
-    load(fullfile('rir', filename + "_DecayFitNet_est.mat"))
+    load(fullfile('rirs', filename + "_DecayFitNet_est.mat"))
     est.T = double(T);  est.A = double(A); est.N = double(N); est.norm = double(norm); 
     clear norm A T N
     est = transposeAllFields(est);
