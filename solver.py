@@ -11,7 +11,7 @@ from eq_design import FilterDesigner
 
 def main(args, train_dataset, valid_dataset):
     # initialize network 
-    net = DiffFDN(args.delays, args.gain_per_sample, args.device, args.scattering)
+    net = DiffFDN(args.delays, args.gain_per_sample, args.device, args.scattering, args.householder)
     # parameters initialization 
     net.apply(weights_init_normal)  
     # construct trainer
@@ -87,7 +87,9 @@ if __name__ == '__main__':
         help='Number of bands in one octave. One between 1 and 3. NOTE, this is still under development.')
     # scattering feedback matrix 
     parser.add_argument('--scattering', action='store_true', default=False,
-        help='If true use te scattering FDN configuaration')
+        help='If true use the scattering FDN configuaration')
+    parser.add_argument('--householder', action='store_true', default=False,
+        help='If true use the householder feedback matrix')
     args = parser.parse_args()
 
     # make output directory
