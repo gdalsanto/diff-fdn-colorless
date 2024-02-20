@@ -58,33 +58,11 @@ class DiffFDN(nn.Module):
 
         B = to_complex(self.B)
         C = to_complex(self.C)
-
         m = self.m  
         V = self.get_feedback_matrix(x)
-        '''
-        if self.scattering:
-            self.get_feedback_matrix()
-            A = self.ortho_param(self.A).permute(1, 2, 0)
-            V = cascaded_paraunit_matrix(
-                self.N, 
-                self.K-1, 
-                gain_per_sample = 1, 
-                sparsity=self.sparsity, 
-                matrix=A)
-            self.V = V.detach().clone() # for logging
-            # put part of main delay to left and right delays (to break the syncrony of paths)
-            V = shift_matrix(V, self.m_L, direction='left')
-            V = shift_matrix(V, self.m_R, direction='right')
-            V = to_complex(V)
-            V = torch.einsum('jim, mn -> jimn', V,  (x.view(-1,1)**-torch.arange(0, V.shape[-1])).permute(1,0))
-            V = torch.sum(V, dim=2).permute(2, 0, 1)          
-        else:
-            V = to_complex(self.ortho_param(self.A))
-        '''
         D = torch.diag_embed(torch.unsqueeze(x, dim=-1) ** m)
         Gamma = to_complex(torch.diag(self.gain_per_sample**m))
 
-        
         if self.rir_synthesis:
             self.set_tone_control(x, self.TC_SOS)
             self.set_attenuation_filter(x, self.G_SOS)
@@ -98,7 +76,9 @@ class DiffFDN(nn.Module):
         return H
 
     def get_feedback_matrix(self, z):
+        # get feedback matrix depending on input arguments 
         if self.householder:
+            # generate householder matrix from unitary vector 
             u = self.u / torch.norm(self.u, dim=1, keepdim=True)
             # this is just to save A as a model parameter
             A = torch.eye(self.N).unsqueeze(0).expand(self.K, self.N, self.N) 
@@ -107,6 +87,7 @@ class DiffFDN(nn.Module):
             A = self.ortho_param(self.A)
 
         if self.scattering:
+            # generate scattering matrix from tensor of orthogonal matrices 
             A = A.permute(1, 2, 0)
             V = cascaded_paraunit_matrix(
                 self.N, 
