@@ -8,5 +8,6 @@ config_*.py
 /runs
 /mushra
 .vscode
+launch.json
 .vscode/launch.json
 *.pyc
