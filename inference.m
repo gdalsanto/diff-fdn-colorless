@@ -6,6 +6,7 @@ clear; clc; close all;
 addpath(genpath('/Users/dalsag1/Dropbox (Aalto)/aalto/projects/analysis-synthesis-of-RIR/git/rir-analysis-synthesis/informed/fdnToolbox'))
 
 results_dir = "./output/20240217-123701";
+results_dir = "/Users/dalsag1/Dropbox (Aalto)/aalto/projects/analysis-synthesis-of-RIR/git/rir-analysis-synthesis/informed/output/20240221-111550";
 output_dir = fullfile(results_dir, 'matlab');
 
 %% Analyse reference RIR 
@@ -29,6 +30,8 @@ else
     rirLen = size(rir,1);
    
     nSlopes = 1; % approximate RIR with a single slope
+    fBands = [63, 125, 250, 500, 1000, 2000, 4000, 8000];
+
     % Unless you have the M2 chio, you should be able to get the EDR
     % parameters from the DecayFitNet Toolbox. In this code I'm just
     % uploading a presetimated values 
@@ -38,7 +41,7 @@ else
     est.T = double(T);  est.A = double(A); est.N = double(N); est.norm = double(norm); 
     clear norm A T N
     est = transposeAllFields(est);
-    [est.L, est.A, est.N] = decayFitNet2InitialLevel(est.T, est.A, est.N, est.norm, fs, rirLen, fBands(cInd) );
+    [est.L, est.A, est.N] = decayFitNet2InitialLevel(est.T, est.A, est.N, est.norm, fs, rirLen, fBands);
 
     % absorption filters, shorten top and bottom band
     T60frequency = [1, fBands fs];
@@ -110,7 +113,7 @@ for typeCell = types
             inputGain = inputGain(:);
             outputGain = outputGain(:)';
             outputGain = zSOS(permute(equalizationSOS,[3 4 1 2]) .*  outputGain);
-            zAbsorptionSCAT = zSOS(absorptionGEQ(double(T), double(delays+Adl/2), fs),'isDiagonal',true);
+            zAbsorptionSCAT = zSOS(absorptionGEQ(targetT60, double(delays+Adl/2), fs),'isDiagonal',true);
             feedbackMatrix = shiftMatrix(double(feedbackMatrix), delayLeft, 'left');
             feedbackMatrix = shiftMatrix(feedbackMatrix, delayRight, 'right');
             mainDelay = double(delays - delayLeft - delayRight);
