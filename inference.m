@@ -3,10 +3,9 @@
 
 clear; clc; close all;
 
-addpath(genpath('/Users/dalsag1/Dropbox (Aalto)/aalto/projects/analysis-synthesis-of-RIR/git/rir-analysis-synthesis/informed/fdnToolbox'))
+addpath(genpath('fdnToolbox'))
 
-results_dir = "./output/20240217-123701";
-results_dir = "/Users/dalsag1/Dropbox (Aalto)/aalto/projects/analysis-synthesis-of-RIR/git/rir-analysis-synthesis/informed/output/20240221-111550";
+results_dir = "./output/20240306-211312";
 output_dir = fullfile(results_dir, 'matlab');
 
 %% Analyse reference RIR 
@@ -59,7 +58,7 @@ end
 %% construct FDN
 
 if isfile(fullfile(results_dir, 'scat_parameters.mat'))
-    types = {'SCAT'};
+    types = {'SCAT', 'SCAT_INIT'};
 else
     types = {'DFDN','RO'};
 end
@@ -118,14 +117,30 @@ for typeCell = types
             feedbackMatrix = shiftMatrix(feedbackMatrix, delayRight, 'right');
             mainDelay = double(delays - delayLeft - delayRight);
             matrixFilter = zFIR(double(feedbackMatrix));
-            ir.(type) = dss2impz(irLen, mainDelay, matrixFilter, inputGain, outputGain, zeros(1,1), 'absorptionFilters', zAbsorptionSCAT);
+            ir.(type) = dss2impzTransposed(irLen, mainDelay, matrixFilter, inputGain, outputGain, zeros(1,1), 'absorptionFilters', zAbsorptionSCAT);
+            delays = tempDelays;
+        case 'SCAT_INIT' 
+            tempDelays = delays;
+            load(fullfile(results_dir, 'scat_parameters_init.mat'))
+            Adl = size(feedbackMatrix, 3);
+            delayLeft = double(delayLeft);
+            delayRight = double(delayRight);
+            inputGain = inputGain(:);
+            outputGain = outputGain(:)';
+            outputGain = zSOS(permute(equalizationSOS,[3 4 1 2]) .*  outputGain);
+            zAbsorptionSCAT = zSOS(absorptionGEQ(targetT60, double(delays+Adl/2), fs),'isDiagonal',true);
+            feedbackMatrix = shiftMatrix(double(feedbackMatrix), delayLeft, 'left');
+            feedbackMatrix = shiftMatrix(feedbackMatrix, delayRight, 'right');
+            mainDelay = double(delays - delayLeft - delayRight);
+            matrixFilter = zFIR(double(feedbackMatrix));
+            ir.(type) = dss2impzTransposed(irLen, mainDelay, matrixFilter, inputGain, outputGain, zeros(1,1), 'absorptionFilters', zAbsorptionSCAT);
             delays = tempDelays;
     end
 
     % generate impulse response
 
     % save impulse response
-    name = ['ir_',type,'.wav'];
+    name = ['ir_TR_',type,'.wav'];
     filename = fullfile(output_dir,name);
     audiowrite(filename, ir.(type)/max(abs(ir.(type))),fs);
 end
