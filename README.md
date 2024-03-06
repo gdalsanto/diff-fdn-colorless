@@ -28,6 +28,7 @@ The MATLAB demo code `inference.m` shows how to load the optimized FDN parameter
 
 ## References
 Audio demos are published in: [Feedback Delay Network Optimization](http://research.spa.aalto.fi/publications/papers/eurasip-colorless-fdn/).  
+The paper is now on [arXiv](http://arxiv.org/abs/2402.11216)! 
 ```
 [1] Dal Santo G., Prawda K., Schlecht S. J., and Välimäki V., "Feedback Delay Network Optimization." in EURASIP Journal on Audio, Speech, and Music Processing - sumbitted for reviews on 31.01.2024
 [2] Dal Santo G., Prawda K., Schlecht S. J., and Välimäki V., "Differentiable Feedback Delay Network for colorless reverberation." in the 26th International Conference on Digital Audio Effects (DAFx23), Copenhagen, Denmark, Sept. 4-7 2023 
