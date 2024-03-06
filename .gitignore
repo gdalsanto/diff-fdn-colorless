@@ -11,3 +11,4 @@ config_*.py
 launch.json
 .vscode/launch.json
 *.pyc
+*.json
