@@ -40,8 +40,8 @@ class DiffFDN(nn.Module):
             self.K = 4  # number of stages
             self.sparsity = 3
             self.A = nn.Parameter(2*torch.rand(self.K, self.N, self.N)/np.sqrt(self.N) - 1/np.sqrt(self.N))
-            self.m_L = torch.randint(low=1, high=550,size=[self.N])
-            self.m_R = torch.randint(low=1, high=550,size=[self.N])
+            self.m_L = torch.randint(low=1, high=int(np.floor(min(delays)/2)), size=[self.N])  # Convert min(delays)/2 to an integer
+            self.m_R = torch.randint(low=1, high=int(np.floor(min(delays)/2)), size=[self.N])  # Convert min(delays)/2 to an integer
         else:
             self.A = nn.Parameter(2*torch.rand(self.N, self.N)/np.sqrt(self.N) - 1/np.sqrt(self.N))
 
