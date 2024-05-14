@@ -20,11 +20,12 @@ class MatrixExponential(nn.Module):
 
 class DiffFDN(nn.Module):
     # recursive neural netwrok 
-    def __init__(self, delays, gain_per_sample, device, scattering = False, householder = False):
+    def __init__(self, delays, gain_per_sample, device, scattering = False, householder = False, transpose = False):
         super().__init__()
         self.device = device
         self.scattering = scattering
         self.householder = householder
+        self.transpose = transpose
         # input parameters
         self.gain_per_sample = gain_per_sample
         self.m = torch.tensor(delays).squeeze()
@@ -67,10 +68,20 @@ class DiffFDN(nn.Module):
             self.set_tone_control(x, self.TC_SOS)
             self.set_attenuation_filter(x, self.G_SOS)
             C = torch.matmul(self.TC.reshape(x.shape[0], 1), C).reshape(x.shape[0], 1, self.N)
-            H = torch.matmul(C, torch.matmul(torch.inverse(torch.squeeze(D) - torch.matmul(self.G, V)), B[0,:,:]))
+            if self.transpose:
+                D = torch.diag_embed(torch.unsqueeze(x, dim=-1) ** -m)
+                H = torch.matmul(C, torch.matmul(torch.inverse(torch.inverse(torch.matmul(self.G, V)) - torch.squeeze(D)), B[0,:,:]))
+            else:
+                D = torch.diag_embed(torch.unsqueeze(x, dim=-1) ** m)
+                H = torch.matmul(C, torch.matmul(torch.inverse(torch.squeeze(D) - torch.matmul(self.G, V)), B[0,:,:]))
             H = torch.squeeze(H, -1)
         else:
-            Hchannel = torch.matmul(torch.inverse(D - torch.matmul(V,Gamma)), B)
+            if self.transpose:
+                D = torch.diag_embed(torch.unsqueeze(x, dim=-1) ** -m)
+                Hchannel = torch.matmul(torch.inverse(torch.inverse(torch.matmul(V,Gamma)) - D), B)
+            else:
+                D = torch.diag_embed(torch.unsqueeze(x, dim=-1) ** m)
+                Hchannel = torch.matmul(torch.inverse(D - torch.matmul(V,Gamma)), B)
             H = Hchannel.squeeze()*C.squeeze()  
         
         return H

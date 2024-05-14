@@ -71,8 +71,8 @@ if __name__ == '__main__':
     # optimizer 
     parser.add_argument('--lr', type=float, default=1e-3,
         help='learning rate')
-    parser.add_argument('--alpha', type=int, default=1,
-        help='temporal loss scaling factor')
+    parser.add_argument('--alpha', type=int, default=2,
+        help='temporal loss scaling factor. Suggested values 2 or 1 (if scattering == true)')
     # netowrk
     parser.add_argument('--gain_per_sample', type=float, default=0.9999, 
         help='gain per sample value gamma')
@@ -90,6 +90,8 @@ if __name__ == '__main__':
         help='If true use the scattering FDN configuaration')
     parser.add_argument('--householder', action='store_true', default=False,
         help='If true use the householder feedback matrix')
+    parser.add_argument('--transpose', action='store_true', default=False,
+        help='If true use transposed configuration')
     args = parser.parse_args()
 
     # make output directory
