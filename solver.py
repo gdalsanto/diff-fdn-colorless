@@ -10,6 +10,14 @@ from trainer import Trainer
 from eq_design import FilterDesigner
 
 def main(args, train_dataset, valid_dataset):
+    """
+    Main function for training and saving parameters and IR.
+
+    Args:
+        args: The command line arguments.
+        train_dataset: The training dataset.
+        valid_dataset: The validation dataset.
+    """
     # initialize network 
     net = DiffFDN(args.delays, args.gain_per_sample, args.device, args.scattering, args.householder)
     # parameters initialization 
