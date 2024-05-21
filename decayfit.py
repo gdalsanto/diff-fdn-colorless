@@ -25,7 +25,7 @@ def getEDCparam(rir, filter_frequencies, n_slopes = 1, sr=48000, device='cpu'):
     rir_preprocessing = PreprocessRIR(sample_rate=sr, filter_frequencies=filter_frequencies)
 
     # Schroeder integration, analyse_full_rir: if RIR onset should be detected, set this to False
-    true_edc, __ = rir_preprocessing.schroeder(rir, analyse_full_rir=False)
+    true_edc, __ = rir_preprocessing.schroeder(rir, analyse_full_rir=True)
     time_axis = (torch.linspace(0, true_edc.shape[2] - 1, true_edc.shape[2]) / sr)
 
     # Permute into [n_bands, n_batches, n_samples]
