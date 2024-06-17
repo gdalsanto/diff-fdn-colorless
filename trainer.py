@@ -46,7 +46,7 @@ class Trainer:
             # validation
             epoch_loss = 0
             for data in valid_dataset:
-                epoch_loss += self.train_step(data)
+                epoch_loss += self.valid_step(data)
             self.valid_loss.append(epoch_loss/len(valid_dataset))
             et_epoch = time.time()
 
