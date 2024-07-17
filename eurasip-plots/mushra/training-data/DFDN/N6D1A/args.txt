@@ -1,0 +1,16 @@
+alpha,1
+batch_size,2000
+delays,[997.0, 1153.0, 1327.0, 1559.0, 1801.0, 2099.0]
+device,cuda
+gain_per_sample,0.9999
+log_epochs,False
+lr,0.001
+max_epochs,50
+n_trials,100
+num,480000
+reference_ir,None
+samplerate,48000
+shuffle,True
+split,0.8
+testname,test06A
+train_dir,output/test06A/N6-068

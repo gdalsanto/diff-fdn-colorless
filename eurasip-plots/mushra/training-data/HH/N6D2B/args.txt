@@ -1,0 +1,15 @@
+alpha,1
+batch_size,2000
+delays,[887.0, 911.0, 941.0, 2017.0, 2053.0, 2129.0]
+device,cuda
+gain_per_sample,0.9999
+householder,True
+log_epochs,False
+lr,0.001
+max_epochs,20
+num,480000
+samplerate,48000
+shuffle,True
+split,0.8
+testname,test_perf_hh_06B
+train_dir,output/test_perf_hh_06B/N6-006

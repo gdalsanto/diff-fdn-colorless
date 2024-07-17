@@ -1,0 +1,17 @@
+alpha,1
+batch_size,5000
+delays,[887.0, 911.0, 941.0, 2017.0, 2053.0, 2129.0]
+device,cuda
+gain_per_sample,0.9999
+log_epochs,False
+lr,0.001
+max_epochs,35
+n_trials,10
+num,480000
+reference_ir,None
+samplerate,48000
+scattering_fdn,True
+shuffle,True
+split,0.8
+testname,test_perf_scat_06B
+train_dir,output/test_perf_scat_06B/N6-005
