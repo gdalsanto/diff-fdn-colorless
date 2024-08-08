@@ -8,6 +8,8 @@ from dataloader import *
 from model import DiffFDN
 from trainer import Trainer
 from eq_design import FilterDesigner
+# set fixed random seed for reproducibility
+torch.manual_seed(130798)
 
 def main(args, train_dataset, valid_dataset):
     """
@@ -70,16 +72,16 @@ if __name__ == '__main__':
     parser.add_argument('--shuffle', action='store_false',
         help='if true, shuffle the data in the dataset at every epoch')
     # training
-    parser.add_argument('--batch_size', type=int, default=2000,
+    parser.add_argument('--batch_size', type=int, default=10000,
         help='batch size')
-    parser.add_argument('--max_epochs', type=int, default=10, 
+    parser.add_argument('--max_epochs', type=int, default=20, 
         help='maximum number of training epochs')
     parser.add_argument('--log_epochs', action='store_true',
         help='Store met parameters at every epoch')
     # optimizer 
     parser.add_argument('--lr', type=float, default=1e-3,
         help='learning rate')
-    parser.add_argument('--alpha', type=int, default=2,
+    parser.add_argument('--alpha', type=float, default=2.,
         help='temporal loss scaling factor. Suggested values 2 or 1 (if scattering == true)')
     # netowrk
     parser.add_argument('--gain_per_sample', type=float, default=0.9999, 

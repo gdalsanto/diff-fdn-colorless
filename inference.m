@@ -5,15 +5,15 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 
-results_dir = "./output/20240514-143741";
+results_dir = "./output/20240808-170003";
 output_dir = fullfile(results_dir, 'matlab');
 
 %% Analyse reference RIR 
 
-delays = [997., 1153., 1327., 1559., 1801., 2099.];
+delays = [593., 743., 929., 1153., 1399., 1699.];
 N = length(delays);
 fs = 48000; 
-irLen = 3*fs;
+irLen = 2*fs;
 if isfile(fullfile(results_dir, 'synthesis_filters.mat'))
     load(fullfile(results_dir, 'synthesis_filters.mat'))
     zAbsorption = zSOS(G_SOS,'isDiagonal',true);
@@ -140,6 +140,8 @@ for typeCell = types
     % save impulse response
     name = ['ir_TR_',type,'.wav'];
     filename = fullfile(output_dir,name);
+    density = sum(abs(ir.(type)))/sqrt(sum(abs(ir.(type)).^2));
+    disp(string(density) + ' ' + type)
     audiowrite(filename, ir.(type)/max(abs(ir.(type))),fs);
 end
 

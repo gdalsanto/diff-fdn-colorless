@@ -30,7 +30,7 @@ class Trainer:
         
     # MAIN TRIANING METHOD
     def train(self, train_dataset, valid_dataset):
-        self.train_loss, self.valid_loss = [], []
+        self.train_loss, self.valid_loss, self.density, loss_sparsity, loss_spectral = [], [], [], [], []
         
         st = time.time()    # start time
         for epoch in trange(self.max_epochs, desc='Training'):
@@ -38,10 +38,20 @@ class Trainer:
 
             # training
             epoch_loss = 0
+            epoch_density = 0
+            epoch_loss_spectral = 0
+            epoch_loss_sparsity = 0
             for data in train_dataset:
-                epoch_loss += self.train_step(data)
+                e_loss, dens, e_spec, e_temp = self.train_step(data)
+                epoch_loss += e_loss
+                epoch_density += dens
+                epoch_loss_spectral += e_spec
+                epoch_loss_sparsity += e_temp
             self.scheduler.step()
             self.train_loss.append(epoch_loss/len(train_dataset))
+            self.density.append(dens/len(train_dataset))
+            loss_spectral.append(epoch_loss_spectral/len(train_dataset))
+            loss_sparsity.append(epoch_loss_sparsity/len(train_dataset))
 
             # validation
             epoch_loss = 0
@@ -64,6 +74,14 @@ class Trainer:
 
         et = time.time()    # end time 
         print('Training time: {:.3f}s'.format(et-st))
+        import scipy.io as sio
+
+        # Save density to mat file
+        sio.savemat(os.path.join(self.train_dir,'density.mat'), {'density': self.density})
+        sio.savemat(os.path.join(self.train_dir,'train_loss.mat'), {'train_loss': self.train_loss})
+        sio.savemat(os.path.join(self.train_dir,'spectral.mat'), {'spectral_loss': loss_spectral})
+        sio.savemat(os.path.join(self.train_dir,'sparisty.mat'), {'sparsity_loss': loss_sparsity})
+
 
     def train_step(self, data):
         # batch processing
@@ -74,7 +92,10 @@ class Trainer:
         
         loss.backward()
         self.optimizer.step()
-        return loss.item()
+
+        h = self.get_ir()
+        density = torch.norm(h, p=1, dim=-1) / torch.norm(h, p=2, dim=-1)
+        return loss.item(), density.item(), self.criterion[0](H, labels).item(), self.criterion[1](self.net.ortho_param(self.net.A)).item()
 
     def valid_step(self, data):
         # batch processing
@@ -125,3 +146,10 @@ class Trainer:
                         48000,
                         bits_per_sample=32,
                         channels_first=False)        
+    
+    def get_ir(self):
+        if self.scattering:
+            print('Cannot compute the impulse response for FDNs with scattering feedback matrices')
+            return
+        _, h = get_response(self.z, self.net)
+        return h
