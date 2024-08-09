@@ -72,7 +72,7 @@ if __name__ == '__main__':
     parser.add_argument('--shuffle', action='store_false',
         help='if true, shuffle the data in the dataset at every epoch')
     # training
-    parser.add_argument('--batch_size', type=int, default=10000,
+    parser.add_argument('--batch_size', type=int, default=2000,
         help='batch size')
     parser.add_argument('--max_epochs', type=int, default=20, 
         help='maximum number of training epochs')

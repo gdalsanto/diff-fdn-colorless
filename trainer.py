@@ -79,8 +79,7 @@ class Trainer:
         # Save density to mat file
         sio.savemat(os.path.join(self.train_dir,'density.mat'), {'density': self.density})
         sio.savemat(os.path.join(self.train_dir,'train_loss.mat'), {'train_loss': self.train_loss})
-        sio.savemat(os.path.join(self.train_dir,'spectral.mat'), {'spectral_loss': loss_spectral})
-        sio.savemat(os.path.join(self.train_dir,'sparisty.mat'), {'sparsity_loss': loss_sparsity})
+        sio.savemat(os.path.join(self.train_dir,'losses_partial.mat'), {'spectral': loss_spectral, 'sparsity': loss_sparsity})
 
 
     def train_step(self, data):

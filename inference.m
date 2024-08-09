@@ -143,7 +143,13 @@ for typeCell = types
     density = sum(abs(ir.(type)))/sqrt(sum(abs(ir.(type)).^2));
     disp(string(density) + ' ' + type)
     audiowrite(filename, ir.(type)/max(abs(ir.(type))),fs);
+
+    figure(1); hold on;
+    [t_abel.(type),echo_dens.(type)] = echoDensity(ir.(type), 1024, fs, 0); 
+    plot(echo_dens.(type));
 end
+figure(1); 
+legend(types)
 
 %% functions 
 function Y = skew(X)
