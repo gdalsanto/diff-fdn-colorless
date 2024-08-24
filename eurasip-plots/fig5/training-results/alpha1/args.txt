@@ -15,5 +15,5 @@ samplerate,48000
 scattering,False
 shuffle,True
 split,0.8
-train_dir,output/20240809-114644
+train_dir,output/20240824-142906
 transpose,False
