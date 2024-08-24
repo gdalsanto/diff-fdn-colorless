@@ -18,7 +18,7 @@ delays =  [797.0, 839.0, 3547.0, 3581.0];
 Gamma = diag(0.9998.^delays);
 % load parameters
 load(fullfile(results_dir, '4', 'parameters.mat'))
-type = 'optim';
+type = 'optim4';
 temp = B; clear B
 B.(type) = temp(:);        % input gains as column
 temp = C; clear C
@@ -28,10 +28,12 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB1, tfA1] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
-
+[residues.(type), poles1.(type), ...
+        direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
+        dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
 load(fullfile(results_dir, '4','parameters_init.mat'))
-type = 'init';
+type = 'init4';
 temp = B; clear B
 B.(type) = temp(:);        % input gains as column
 temp = C; clear C
@@ -41,7 +43,9 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB2, tfA2] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
-
+[residues.(type), poles2.(type), ...
+        direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
+        dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
 % transfer function
 [h1,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
@@ -54,7 +58,7 @@ delays =  [887.0, 911.0, 941.0, 2017.0, 2053.0, 2129.0] ;66
 Gamma = diag(0.9998.^delays);
 % load parameters
 load(fullfile(results_dir, '6','parameters.mat'))
-type = 'optim';
+type = 'optim6';
 temp = B; clear B
 B.(type) = temp(:);        % input gains as column
 temp = C; clear C
@@ -64,10 +68,12 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB1, tfA1] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
-
+[residues.(type), poles1.(type), ...
+        direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
+        dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
 load(fullfile(results_dir, '6','parameters_init.mat'))
-type = 'init';
+type = 'init6';
 temp = B; clear B
 B.(type) = temp(:);        % input gains as column
 temp = C; clear C
@@ -77,7 +83,9 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB2, tfA2] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
-
+[residues.(type), poles2.(type), ...
+        direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
+        dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
 % transfer function
 [h3,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
@@ -91,7 +99,7 @@ delays = [241.0, 263.0, 281.0, 293.0, 1871.0, 1973.0, 1999.0, 2027.0];
 Gamma = diag(0.9998.^delays);
 % load parameters
 load(fullfile(results_dir, '8', 'parameters.mat'))
-type = 'optim';
+type = 'optim8';
 temp = B; clear B
 B.(type) = temp(:);        % input gains as column
 temp = C; clear C
@@ -101,10 +109,12 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB1, tfA1] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
-
+[residues.(type), poles2.(type), ...
+        direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
+        dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
 load(fullfile(results_dir, '8', 'parameters_init.mat'))
-type = 'init';
+type = 'init8';
 temp = B; clear B
 B.(type) = temp(:);        % input gains as column
 temp = C; clear C
@@ -114,7 +124,9 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB2, tfA2] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
-
+[residues.(type), poles2.(type), ...
+        direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
+        dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
 % transfer function
 [h5,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
@@ -155,6 +167,39 @@ set(gca,'yTickLabels',[])
 legend('Optim', 'Init')
 xlabel('Frequency (kHz)')
 ylabel('Magnitude (dB)')
+ax=gca;
+ax.FontSize = 24;
+set(ax, 'box', 'on', 'Visible', 'on')
+%% modal decomposition 
+types = {'init4','optim4','init6','optim6','init8','optim8'};
+xx = [0 0 40 40 80 80];
+% modal excitation histogram 
+figure(); hold on; grid on;
+i = 1;
+colors = {[120,120,120]./255,  [0,135,255]./255, [120,120,120]./255,  [0,135,255]./255,[120,120,120]./255,  [0,135,255]./255}
+for typeCell = types
+    type = typeCell{1};
+    res = db(abs(residues.(type)));
+    res = res - mean(res) +xx(i);
+    histogram(res,'FaceAlpha',0.2,'BinWidth',2,'FaceColor',colors{i},'Normalization', 'probability','Linewidth',1.5,'EdgeColor',colors{i})
+    i = i+1;
+end
+txt = '$N=4$';
+text(0,0.275,txt, 'FontSize', 20, 'HorizontalAlignment','center')
+
+txt = '$N=6$';
+text(40,0.275,txt, 'FontSize', 20, 'HorizontalAlignment','center')
+
+txt = '$N=8$';
+text(80,0.275,txt, 'FontSize', 20, 'HorizontalAlignment','center')
+
+
+xticks([-10 0 10 20 30 40 50 60 70 80 90])
+xticklabels({'$-10$','$0$','$10$', [], '$-10$','$0$','$10$', [], '$-10$', '$0$','$10$', []})
+xlim([-30, 110])
+legend('Init','Optim')
+xlabel('Residue Magnitude (dB)')
+ylabel('Relative probability')
 ax=gca;
 ax.FontSize = 24;
 set(ax, 'box', 'on', 'Visible', 'on')
