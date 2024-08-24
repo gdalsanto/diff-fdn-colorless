@@ -8,7 +8,7 @@ set(groot, 'defaultAxesTickLabelInterpreter','latex');
 set(groot, 'defaultLegendInterpreter','latex');
 
 results_dir = 'training-results';
-colors = {[239,95,40]/255, [83,157,255]/255,[0,199,87]/255};
+colors = {[239,95,40]/255, [83,157,255]/255,[0,199,87]/255, [120,120,120]./255};
 
 %% alpha = 1
 
@@ -32,22 +32,21 @@ grid on
 ylabel('Loss')
 ax=gca;
 ax.FontSize = 24;
-%xlim([1, 15])
-%ylim([0, 2])
+xlim([1, 10])
+ylim([-1.25, 1.5])
 
-ax2 = subplot(1, 2, 2); hold on;
-set(ax2, 'box', 'on', 'Visible', 'on')
 
-plot(density/density(1),'LineWidth',2, "Color",colors{1});
-grid on;
-yticks([1 1.05 1.1 1.15 1.2])
-yticklabels({'0','5','10','15','20'})
 
-ylabel('Relative Density Increase ($\%$)')
-xlabel('Epoch','FontSize',24);
+% plot(density/density(1),'LineWidth',2, "Color",colors{1});
+%grid on;
+%yticks([1 1.05 1.1 1.15 1.2])
+%yticklabels({'0','5','10','15','20'})
 
-ax=gca;
-ax.FontSize = 24;
+%ylabel('Relative Density Increase ($\%$)')
+%xlabel('Epoch','FontSize',24);
+
+%ax=gca;
+%ax.FontSize = 24;
 %xlim([1, 15])
 %ylim([1, 1.20001])
 
@@ -60,15 +59,15 @@ load(fullfile(results_dir, 'alpha0','density.mat'))
 figure(1);
 subplot(1, 2, 1);
 plot(train_loss,'LineWidth',2, "Color",colors{3}); grid on
-legend('${\mathcal{L}}$', '${\mathcal{L}}_\textrm{spectral}$', '${\mathcal{L}}_\textrm{sparsity}$',  '${\mathcal{L}}^*$', 'FontSize',24)
+legend('${\mathcal{L}}$', '${\mathcal{L}}_\textrm{spectral}$', '${\mathcal{L}}_\textrm{sparsity}$',  '${\mathcal{L}}_\textrm{spectral}^*$', 'FontSize',24, 'Location','southeast')
 
-subplot(1, 2, 2); 
-plot(density/density(1),'LineWidth',2, "Color",colors{3});
+% subplot(1, 2, 2); 
+% plot(density/density(1),'LineWidth',2, "Color",colors{3});
 
 %% echo density
 fs = 48000;
 irLen = 2*fs;
-delays = [809, 877, 937, 1049, 1151, 1249, 1373, 1499];
+delays = [809.0, 877.0, 937.0, 1049.0, 1151.0, 1249.0, 1373.0, 1499.0];
 Gamma = diag(0.99999.^delays);
 % load parameters
 load(fullfile(results_dir, 'alpha0','parameters.mat'))
@@ -113,11 +112,20 @@ ir.(type) = dss2impz(...
     irLen, delays, A.(type), B.(type), C.(type), D.(type));
 [t_abel.(type),echo_dens.(type)] = echoDensity(ir.(type), 1024, fs, 0); 
 
+time = linspace(0, irLen/fs, irLen); 
+ax2 = subplot(1, 2, 2); hold on; grid on
+set(ax2, 'box', 'on', 'Visible', 'on')
+plot(time, echo_dens.('init'), "Color",colors{4},'LineWidth',2);
+plot(time, echo_dens.('alpha0'), "Color",colors{3},'LineWidth',2);
+plot(time, echo_dens.('alpha1'), "Color",colors{2},'LineWidth',2);
 
-figure(2); hold on;
-plot(echo_dens.('init'));
-plot(echo_dens.('alpha0'));
-plot(echo_dens.('alpha1'));
+ylabel('Echo Density')
+xlabel('Time (s)','FontSize',24);
+
+ax=gca;
+ax.FontSize = 24;
+
+legend('Init', 'Optim ($\alpha=0$)', 'Optim ($\alpha=1$)', 'Location','southeast')
 function Y = skew(X)
     X = triu(X,1);
     Y = X - transpose(X);
