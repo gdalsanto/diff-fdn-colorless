@@ -1,11 +1,10 @@
 clear all; close all; clc
 
-addpath(genpath('../fdnToolbox'))
+addpath(genpath('../../fdnToolbox'))
 set(groot, 'defaulttextinterpreter','latex');  
 set(groot, 'defaultAxesTickLabelInterpreter','latex');  
 set(groot, 'defaultLegendInterpreter','latex');
 
-addpath(genpath('fdnToolbox'))
 addpath(genpath('utilities'))
 rng(111)
 
@@ -161,10 +160,10 @@ xticks([10 10.25 10.5 10.75 11 11.25 11.5 11.75 12 12.25 12.5 13]*1000)
 xticklabels({'$10$','$10.25$','$10.5$','$10.75$','$11$','$11.25$', '$11.5$', '$11.75$','$12$', '$12.25$', '$12.5$', '$13$'})
 ylim([-340, 50])
 set(gca,'yTickLabels',[])
-%yticks([-250 -200 -150 -100 -50 0])
-%yticklabels({'$0$', '$0$', '$0$', '$0$', '$0$', '$0$'})
+yticks([-290 -240 -170 -120 -50 0])
+yticklabels({'$0$', '$0$', '$0$', '$0$', '$0$', '$0$'})
 
-legend('Optim', 'Init')
+legend('Init', 'Optim')
 xlabel('Frequency (kHz)')
 ylabel('Magnitude (dB)')
 ax=gca;
@@ -198,12 +197,13 @@ xticks([-10 0 10 20 30 40 50 60 70 80 90])
 xticklabels({'$-10$','$0$','$10$', [], '$-10$','$0$','$10$', [], '$-10$', '$0$','$10$', []})
 xlim([-30, 110])
 legend('Init','Optim')
-xlabel('Residue Magnitude (dB)')
+xlabel('Magnitude (dB)')
 ylabel('Relative probability')
 ax=gca;
 ax.FontSize = 24;
 set(ax, 'box', 'on', 'Visible', 'on')
-
+set(gca,'Layer','top')
+set(gca,'LineWidth',2);
 function Y = skew(X)
     X = triu(X,1);
     Y = X - transpose(X);
