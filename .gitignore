@@ -13,3 +13,6 @@ launch.json
 *.pyc
 *.json
 inference_tests.m
+skew.m
+eurasip_test.m
+icassp_test.m
