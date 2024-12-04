@@ -4,7 +4,6 @@ __pycache__/
 /output
 config_*.py
 /dump
-/data
 /runs
 /mushra
 .vscode
