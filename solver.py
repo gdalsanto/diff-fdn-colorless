@@ -18,6 +18,7 @@ import uuid
 import shutil
 import argparse
 import sys
+import scipy.io as sio
 import glob
 from tqdm import trange, tqdm
 
@@ -64,6 +65,8 @@ def train(args, train_dataset, valid_dataset):
     net = DiffFDN(args.delays, args.gain_per_sample, args.device)
     # parameters initialization 
     net.apply(weights_init_normal)
+    # load mat file with initial parameters using sio.loadmat
+
 
     # ----------- TRAINING CONFIGURATION
     # optimizer
@@ -82,20 +85,29 @@ def train(args, train_dataset, valid_dataset):
     x = torch.tensor(x.view(x.size(0), -1))
     train_loss, valid_loss = [], []
 
-    # energy normalization
-    with torch.no_grad():
-        inputs, _ = next(iter(train_dataset))
-        _, _, param = net(inputs) 
-        A, B, C, Gamma, m = param 
-        D = torch.diag_embed(x ** m)
-        H = torch.matmul(torch.matmul(C, torch.inverse(D - torch.matmul(A,Gamma))), B).squeeze()
-        energyH = torch.sum(torch.pow(torch.abs(H),2)) / torch.tensor(H.size())
+    
+    if args.init_param is not None:
+        with torch.no_grad():
+            print('Loading initial parameters from file: {} \nNote that the delays are not being changed'.format(args.init_param))
+            init_param = sio.loadmat(args.init_param)
+            net.B.data.copy_(torch.tensor(init_param['B']).unsqueeze(-1))
+            net.C.data.copy_(torch.tensor(init_param['C']).unsqueeze(-2))
+            net.A.parametrizations.weight.original.copy_(torch.tensor(init_param['A']))
+    else: 
+        # energy normalization
+        with torch.no_grad():
+            inputs, _ = next(iter(train_dataset))
+            _, _, param = net(inputs) 
+            A, B, C, Gamma, m = param 
+            D = torch.diag_embed(x ** m)
+            H = torch.matmul(torch.matmul(C, torch.inverse(D - torch.matmul(A,Gamma))), B).squeeze()
+            energyH = torch.sum(torch.pow(torch.abs(H),2)) / torch.tensor(H.size())
 
-        # apply energy normalization on input and output gains only
-        for name, param in net.named_parameters():
-            if name == 'B' or name == 'C':    
-                param.data.copy_(torch.div(param.data, torch.pow( energyH, 1/4)))
-
+            # apply energy normalization on input and output gains only
+            for name, param in net.named_parameters():
+                if name == 'B' or name == 'C':    
+                    param.data.copy_(torch.div(param.data, torch.pow( energyH, 1/4)))
+        
     # save initial parameters and config file
     param_filename = 'parameters_init.mat' 
 
@@ -187,6 +199,8 @@ if __name__ == '__main__':
         help ='path to output directory')
     parser.add_argument('--device', default='cuda',
         help='training device')
+    parser.add_argument('--init_param', type=str, default=None,
+        help='initial parameters file')
     # dataset 
     parser.add_argument('--num', type=int, default=256,
         help = 'dataset size')
