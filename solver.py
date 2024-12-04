@@ -27,6 +27,10 @@ from dataloader import split_dataset, get_dataloader, Dataset
 from losses import asy_p_loss, sparsity_loss
 from models import DiffFDN
 
+# set random seed 
+torch.manual_seed(130798)
+np.random.seed(130798)
+
 def set_device(device):
     if (device == 'cuda') & torch.cuda.is_available():
         torch.set_default_tensor_type(torch.cuda.FloatTensor)
@@ -201,6 +205,9 @@ if __name__ == '__main__':
         help='training device')
     parser.add_argument('--init_param', type=str, default=None,
         help='initial parameters file')
+    parser.add_argument('--n_runs', type=int, default=1, 
+        help='number of runs')
+    parser.add_argument('--testname', type=str, default='test',)
     # dataset 
     parser.add_argument('--num', type=int, default=256,
         help = 'dataset size')
@@ -231,21 +238,32 @@ if __name__ == '__main__':
         help='list of delay lengths')
 
     args = parser.parse_args()
-    print(args.delays)
-    # make output directory
-    if args.train_dir is not None:
-        if not os.path.isdir(args.train_dir):
-            os.makedirs(args.train_dir)
-    else:
-        args.train_dir = os.path.join('output', time.strftime("%Y%m%d-%H%M%S"))
-        os.makedirs(args.train_dir)
 
-    # save arguments 
-    with open(os.path.join(args.train_dir, 'args.txt'), 'w') as f:
-        f.write('\n'.join([str(k) + ',' + str(v) for k, v in sorted(vars(args).items(), key=lambda x: x[0])]))
-    
     args.device = set_device(args.device)
-
     train_dataset, valid_dataset = load_dataset(args)
 
-    train(args, train_dataset, valid_dataset)
+    if args.n_runs == 1:
+        # make output directory
+        if args.train_dir is not None:
+            if not os.path.isdir(args.train_dir):
+                os.makedirs(args.train_dir)
+        else:
+            args.train_dir = os.path.join('output', time.strftime("%Y%m%d-%H%M%S"))
+            os.makedirs(args.train_dir)
+
+        # save arguments 
+        with open(os.path.join(args.train_dir, 'args.txt'), 'w') as f:
+            f.write('\n'.join([str(k) + ',' + str(v) for k, v in sorted(vars(args).items(), key=lambda x: x[0])]))
+
+        # lunch training
+        train(args, train_dataset, valid_dataset)
+    else:
+        for i in range(args.n_runs):
+            # make output directory
+            args.train_dir = os.path.join('output', args.testname, "N{}-{:03d}".format(len(args.delays), i))
+            os.makedirs(args.train_dir)
+            # save arguments 
+            with open(os.path.join(args.train_dir, 'args.txt'), 'w') as f:
+                f.write('\n'.join([str(k) + ',' + str(v) for k, v in sorted(vars(args).items(), key=lambda x: x[0])]))
+            
+            train(args, train_dataset, valid_dataset)
