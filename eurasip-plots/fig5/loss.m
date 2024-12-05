@@ -95,10 +95,25 @@ ir.(type) = dss2impz(...
     irLen, delays, A.(type), B.(type), C.(type), D.(type));
 [t_abel.(type),echo_dens.(type)] = echoDensity(ir.(type), 1024, fs, 0); 
 
+load(fullfile(results_dir, 'dafx23','parameters.mat'))
+type = 'dafx23';
+temp = B; clear B
+B.(type) = temp(:);        % input gains as column
+temp = C; clear C
+C.(type) = temp;
+D.(type) = zeros(1:1);     % direct gains
+% make matrix A orthogonal 
+temp = A; clear A
+A.(type) = double(expm(skew(temp))*Gamma);
+ir.(type) = dss2impz(...
+    irLen, delays, A.(type), B.(type), C.(type), D.(type));
+[t_abel.(type),echo_dens.(type)] = echoDensity(ir.(type), 1024, fs, 0); 
+
 time = linspace(0, irLen/fs, irLen); 
 ax2 = subplot(1, 2, 2); hold on; grid on
 set(ax2, 'box', 'on', 'Visible', 'on')
 plot(time, echo_dens.('init'), "Color",colors{4},'LineWidth',2);
+plot(time, echo_dens.('dafx23'), "Color",colors{1},'LineWidth',2);
 plot(time, echo_dens.('alpha0'), "Color",colors{3},'LineWidth',2);
 plot(time, echo_dens.('alpha1'), "Color",colors{2},'LineWidth',2);
 
@@ -108,7 +123,7 @@ xlabel('Time (s)','FontSize',24);
 ax=gca;
 ax.FontSize = 24;
 
-legend('Init', 'Optim ($\alpha=0$)', 'Optim ($\alpha=1$)', 'Location','southeast')
+legend('Init', 'Optim (DAFx23)', 'Optim ($\alpha=0$)', 'Optim ($\alpha=1$)', 'Location','southeast')
 function Y = skew(X)
     X = triu(X,1);
     Y = X - transpose(X);
