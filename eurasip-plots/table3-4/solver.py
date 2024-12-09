@@ -1,9 +1,11 @@
 import torch
+import torch.nn as nn
 import argparse
 import os
 import time
 import scipy
 import shutil
+import numpy as np
 import scipy.io as sio
 
 from collections import OrderedDict
@@ -11,12 +13,30 @@ from collections import OrderedDict
 from flamo.optimize.dataset import DatasetColorless, load_dataset
 from flamo.optimize.trainer import Trainer
 from flamo.processor import dsp, system
-from flamo.optimize.loss import masked_mse_loss, sparsity_loss
+from flamo.optimize.loss import masked_mse_loss
 from flamo.utils import save_audio
 
 
 torch.manual_seed(130709)
 
+class sparsity_loss(nn.Module):
+    """Calculates the sparsity loss for a given model."""
+    def forward(self, y_pred, y_target, model):
+        core = model.get_core()
+        # check first if core.feedback_loop.feedback.mixing_matrix is an instance of dsp.HouseHolderMatrix()
+        try:
+            isinstance(core.feedback_loop.feedback.mixing_matrix, dsp.HouseholderMatrix)
+            u = torch.real(core.feedback_loop.feedback.mixing_matrix.map(core.feedback_loop.feedback.mixing_matrix.param))
+            A =  torch.eye(len(u)) - 2 *  u*u.transpose(1,0)
+        except:
+            try: 
+                A = core.feedback_loop.feedback.map(core.feedback_loop.feedback.param)
+            except:
+                A = core.feedback_loop.feedback.mixing_matrix.map(core.feedback_loop.feedback.mixing_matrix.param)
+        N = A.shape[-1]
+        # A = torch.matrix_exp(skew_matrix(A))  
+        return -(torch.sum(torch.abs(A)) - N*np.sqrt(N))/(N*(np.sqrt(N)-1))
+    
 def main(args):
     """
     Example function that demonstrates the construction and training of a Feedback Delay Network (FDN) model
@@ -101,10 +121,8 @@ def main(args):
     elif args.feedback_type == 'householder':   
         # Feedback path with householder matrix
         mixing_matrix = dsp.HouseholderMatrix(
-            size=(4, N, N),
+            size=(N, N),
             nfft=args.nfft,
-            gain_per_sample=1,
-            sparsity=3,
             requires_grad=True,
             device=args.device,
         )
@@ -117,7 +135,6 @@ def main(args):
         )
         attenuation.assign_value(gain_per_sample**delay_lengths)
 
-    
     if args.feedback_type == 'orthogonal' or args.feedback_type == 'householder':
         feedback = system.Series(OrderedDict({
             'mixing_matrix': mixing_matrix,
@@ -145,7 +162,7 @@ def main(args):
     with torch.no_grad():
         ir_init =  model.get_time_response(identity=False, fs=args.samplerate).squeeze() 
         save_audio(os.path.join(args.train_dir, "ir_init.wav"), ir_init/torch.max(torch.abs(ir_init)), fs=args.samplerate)
-        save_fdn_params(model, filename='parameters_init')
+        save_fdn_params(model, feedback_type=args.feedback_type, filename='parameters_init')
 
     ## ---------------- OPTIMIZATION SET UP ---------------- ##
 
@@ -173,9 +190,9 @@ def main(args):
     with torch.no_grad():
         ir_optim =  model.get_time_response(identity=False, fs=args.samplerate).squeeze()
         save_audio(os.path.join(args.train_dir, "ir_optim.wav"), ir_optim/torch.max(torch.abs(ir_optim)), fs=args.samplerate)
-        save_fdn_params(model, filename='parameters_optim')
+        save_fdn_params(model, feedback_type=args.feedback_type, filename='parameters_optim')
 
-def save_fdn_params(net, filename='parameters'):
+def save_fdn_params(net, feedback_type='orthogonal', filename='parameters'):
     r"""
     Retrieves the parameters of a feedback delay network (FDN) from a given network and saves them in .mat format.
 
@@ -192,7 +209,16 @@ def save_fdn_params(net, filename='parameters'):
 
     core = net.get_core()
     param = {}
-    param['A'] = core.feedback_loop.feedback.mixing_matrix.param.squeeze().detach().cpu().numpy()
+    if feedback_type == 'orthogonal':
+        param['A'] = core.feedback_loop.feedback.mixing_matrix.param.squeeze().detach().cpu().numpy()
+    elif feedback_type == 'scattering':
+        map_filter = core.feedback_loop.feedback.map_filter
+        map = core.feedback_loop.feedback.map
+        param['A'] = map_filter(map(core.feedback_loop.feedback.param)).squeeze().detach().cpu().numpy()
+        # param['delayLeft'] = core.feedback_loop.feedback.m_L.cpu().numpy()
+        # param['delayRight'] = core.feedback_loop.feedback.m_R.cpu().numpy()
+    elif feedback_type == 'householder':
+        param['u'] = core.feedback_loop.feedback.mixing_matrix.param.squeeze().detach().cpu().numpy()
     param['B'] = core.input_gain.param.squeeze().detach().cpu().numpy()
     param['C'] = core.output_gain.param.squeeze().detach().cpu().numpy()
     param['m'] = core.feedback_loop.feedforward.s2sample(core.feedback_loop.feedforward.map(core.feedback_loop.feedforward.param)).squeeze().detach().cpu().numpy()
