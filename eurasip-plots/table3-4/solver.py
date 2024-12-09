@@ -27,7 +27,7 @@ class sparsity_loss(nn.Module):
         try:
             isinstance(core.feedback_loop.feedback.mixing_matrix, dsp.HouseholderMatrix)
             u = torch.real(core.feedback_loop.feedback.mixing_matrix.map(core.feedback_loop.feedback.mixing_matrix.param))
-            A =  torch.eye(len(u)) - 2 *  u*u.transpose(1,0)
+            A =  torch.eye(len(u), device=u.device) - 2 *  u*u.transpose(1,0)
         except:
             try: 
                 A = core.feedback_loop.feedback.map(core.feedback_loop.feedback.param)
