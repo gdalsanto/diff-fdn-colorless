@@ -3,6 +3,7 @@ import argparse
 import os
 import time
 import scipy
+import shutil
 import scipy.io as sio
 
 from collections import OrderedDict
@@ -164,6 +165,9 @@ def main(args):
 
     # Train the model
     trainer.train(train_loader, valid_loader)
+
+    # remove checkpoints
+    shutil.rmtree(os.path.join(args.train_dir, 'checkpoints'))
 
     # Get optimized impulse response
     with torch.no_grad():
