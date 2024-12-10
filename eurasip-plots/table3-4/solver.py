@@ -13,8 +13,8 @@ from collections import OrderedDict
 from flamo.optimize.dataset import DatasetColorless, load_dataset
 from flamo.optimize.trainer import Trainer
 from flamo.processor import dsp, system
-from flamo.optimize.loss import masked_mse_loss
 from flamo.utils import save_audio
+from flamo.optimize.utils import generate_partitions
 
 
 torch.manual_seed(130709)
@@ -36,7 +36,34 @@ class sparsity_loss(nn.Module):
         N = A.shape[-1]
         # A = torch.matrix_exp(skew_matrix(A))  
         return -(torch.sum(torch.abs(A)) - N*np.sqrt(N))/(N*(np.sqrt(N)-1))
-    
+
+class masked_mse_loss(nn.Module):
+    '''Means squared error between abs(x1) and x2'''
+    def __init__(self, nfft, n_samples, n_sets=1, device='cpu'):
+        super().__init__()
+        self.device = device
+        self.n_samples = n_samples
+        self.n_sets = n_sets
+        self.nfft = nfft
+        self.mask_indices = generate_partitions(torch.arange(self.nfft//2+1), n_samples, n_sets)
+        self.i = -1
+
+        # create 
+    def forward(self, y_pred, y_true):
+        self.i += 1
+        # generate random mask for sparse sampling 
+        if self.i >= self.mask_indices.shape[0]:
+            # generate a new set of mask inddices 
+            self.mask_indices = generate_partitions(torch.arange(self.nfft//2+1), self.n_samples, self.n_sets)
+            self.i = -1
+        loss = 0.0
+        N = y_pred.size(dim=-1)
+        # loss on channels' output
+        for i in range(N):
+            loss = loss + torch.mean((torch.abs(y_pred[..., i])-torch.abs(y_true[..., 0]))**2)  
+
+        return loss/N + torch.mean((torch.abs(torch.sum(y_pred[:,self.mask_indices[self.i], :], dim=-1, keepdim=True))-torch.abs(y_true[:,self.mask_indices[self.i], :]))**2)
+
 def main(args):
     """
     Example function that demonstrates the construction and training of a Feedback Delay Network (FDN) model
@@ -65,8 +92,8 @@ def main(args):
     input_gain = dsp.Gain(
         size=(N, 1), nfft=args.nfft, requires_grad=True, alias_decay_db=alias_decay_db, device=args.device
     )
-    output_gain = dsp.Gain(
-        size=(1, N), nfft=args.nfft, requires_grad=True, alias_decay_db=alias_decay_db, device=args.device
+    output_gain = dsp.parallelGain(
+        size=(N, ), nfft=args.nfft, requires_grad=True, alias_decay_db=alias_decay_db, device=args.device
     )
     # Feedback loop with delays
     delays = dsp.parallelDelay(
@@ -100,7 +127,7 @@ def main(args):
         # read the initial parameters from dafx23
         param = sio.loadmat(os.path.join('eurasip-plots','table3-4','dafx23', "N{:02d}".format(len(delay_lengths)), "N{}-{:03d}".format(len(delay_lengths), args.run_n), 'parameters_init.mat'))
         input_gain.assign_value(torch.tensor(param['B']).transpose(1,0))
-        output_gain.assign_value(torch.tensor(param['C']))
+        output_gain.assign_value(torch.tensor(param['C']).squeeze())
         mixing_matrix.assign_value(torch.tensor(param['A']))
         
     elif args.feedback_type == 'scattering':
@@ -160,8 +187,8 @@ def main(args):
 
     # Get initial impulse response
     with torch.no_grad():
-        ir_init =  model.get_time_response(identity=False, fs=args.samplerate).squeeze() 
-        save_audio(os.path.join(args.train_dir, "ir_init.wav"), ir_init/torch.max(torch.abs(ir_init)), fs=args.samplerate)
+        # ir_init =  model.get_time_response(identity=False, fs=args.samplerate).squeeze() 
+        # save_audio(os.path.join(args.train_dir, "ir_init.wav"), ir_init/torch.max(torch.abs(ir_init)), fs=args.samplerate)
         save_fdn_params(model, feedback_type=args.feedback_type, filename='parameters_init')
 
     ## ---------------- OPTIMIZATION SET UP ---------------- ##
@@ -177,7 +204,7 @@ def main(args):
     # Initialize training process
     trainer = Trainer(model, max_epochs=args.max_epochs, lr=args.lr, train_dir=args.train_dir, device=args.device)
     trainer.register_criterion(masked_mse_loss(nfft=args.nfft, n_samples=2000, n_sets=1, device=args.device), 1)
-    trainer.register_criterion(sparsity_loss(), 0.2, requires_model=True)
+    trainer.register_criterion(sparsity_loss(), 1, requires_model=True)
     ## ---------------- TRAIN ---------------- ##
 
     # Train the model
@@ -188,8 +215,8 @@ def main(args):
 
     # Get optimized impulse response
     with torch.no_grad():
-        ir_optim =  model.get_time_response(identity=False, fs=args.samplerate).squeeze()
-        save_audio(os.path.join(args.train_dir, "ir_optim.wav"), ir_optim/torch.max(torch.abs(ir_optim)), fs=args.samplerate)
+        # ir_optim =  model.get_time_response(identity=False, fs=args.samplerate).squeeze()
+        # save_audio(os.path.join(args.train_dir, "ir_optim.wav"), ir_optim/torch.max(torch.abs(ir_optim)), fs=args.samplerate)
         save_fdn_params(model, feedback_type=args.feedback_type, filename='parameters_optim')
 
 def save_fdn_params(net, feedback_type='orthogonal', filename='parameters'):
