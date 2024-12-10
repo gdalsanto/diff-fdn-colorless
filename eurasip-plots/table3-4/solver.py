@@ -202,7 +202,7 @@ def main(args):
     train_loader, valid_loader = load_dataset(dataset, batch_size=args.batch_size)
 
     # Initialize training process
-    trainer = Trainer(model, max_epochs=args.max_epochs, lr=args.lr, train_dir=args.train_dir, device=args.device)
+    trainer = Trainer(model, max_epochs=args.max_epochs, lr=args.lr, train_dir=args.train_dir, device=args.device, patience_delta=1e-4, step_size=10)
     trainer.register_criterion(masked_mse_loss(nfft=args.nfft, n_samples=2000, n_sets=1, device=args.device), 1)
     trainer.register_criterion(sparsity_loss(), 1, requires_model=True)
     ## ---------------- TRAIN ---------------- ##
