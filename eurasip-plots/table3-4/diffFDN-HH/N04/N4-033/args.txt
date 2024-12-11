@@ -1,0 +1,14 @@
+N,4
+batch_size,1
+device,cuda
+feedback_type,householder
+lr,0.001
+masked_loss,True
+max_epochs,20
+n_runs,100
+nfft,960000
+num,240
+run_n,32
+samplerate,48000
+testname,table34_diffFDN_HH_N04
+train_dir,eurasip-plots/table3-4/output/table34_diffFDN_HH_N04/N4-033

@@ -123,7 +123,7 @@ xlabel('Time (s)','FontSize',24);
 ax=gca;
 ax.FontSize = 24;
 
-legend('Init', 'Optim (DAFx23)', 'Optim ($\alpha=0$)', 'Optim ($\alpha=1$)', 'Location','southeast')
+legend('Init', 'Optim (DAFx23)', 'Optim ($\alpha=0$)', 'Optim ($\alpha=1$)', 'Location','ousoutheast')
 function Y = skew(X)
     X = triu(X,1);
     Y = X - transpose(X);
