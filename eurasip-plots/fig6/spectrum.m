@@ -27,6 +27,12 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB1, tfA1] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
+% transfer function
+[h1,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
+% compute the energy
+e1 = sum(abs(h1).^2);
+% B.(type) = B.(type) / (e1.^(1/4));
+% C.(type) = C.(type) / (e1.^(1/4));
 [residues.(type), poles1.(type), ...
         direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
         dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
@@ -42,13 +48,16 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB2, tfA2] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
+% transfer function
+[h2,w] = freqz(squeeze(tfB2),squeeze(tfA2),2^15, fs);
+% compute the energy
+e2 = sum(abs(h2).^2);
+% B.(type) = B.(type) / (e2.^(1/4));
+% C.(type) = C.(type) / (e2.^(1/4));
 [residues.(type), poles2.(type), ...
         direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
         dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
-% transfer function
-[h1,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
-[h2,w] = freqz(squeeze(tfB2),squeeze(tfA2),2^15, fs);
 
 %% N=6
 fs = 48000;
@@ -67,6 +76,12 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB1, tfA1] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
+% transfer function
+[h3,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
+% compute the energy
+e3 = sum(abs(h3).^2);
+% B.(type) = B.(type) / (e3.^(1/4));
+% C.(type) = C.(type) / (e3.^(1/4));
 [residues.(type), poles1.(type), ...
         direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
         dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
@@ -82,13 +97,16 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB2, tfA2] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
+% transfer function 
+[h4,w] = freqz(squeeze(tfB2),squeeze(tfA2),2^15, fs);
+% compute the energy
+e4 = sum(abs(h4).^2);
+% B.(type) = B.(type) / (e4.^(1/4));
+% C.(type) = C.(type) / (e4.^(1/4));
 [residues.(type), poles2.(type), ...
         direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
         dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
-% transfer function
-[h3,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
-[h4,w] = freqz(squeeze(tfB2),squeeze(tfA2),2^15, fs);
 
 %% N=8
 
@@ -108,6 +126,12 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB1, tfA1] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
+% transfer function
+[h5,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
+% compute energy of the transfer function 
+e5 = sum(abs(h5).^2);
+% B.(type) = B.(type) / (e5.^(1/4));
+% C.(type) = C.(type) / (e5.^(1/4));
 [residues.(type), poles2.(type), ...
         direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
         dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
@@ -123,13 +147,18 @@ D.(type) = zeros(1:1);     % direct gains
 temp = A; clear A
 A.(type) = double(expm(skew(temp))*Gamma);
 [tfB2, tfA2] = dss2tf(delays, A.(type), B.(type), C.(type), D.(type));
+% transfer function
+[h6,w] = freqz(squeeze(tfB2),squeeze(tfA2),2^15, fs);
+% compute energy of the transfer function 
+e6 = sum(abs(h6).^2);
+% B.(type) = B.(type) / (e6.^(1/4));
+% C.(type) = C.(type) / (e6.^(1/4));
+
 [residues.(type), poles2.(type), ...
         direct.(type), isConjugatePolePair.(type), metaData.(type)] = ...
         dss2pr(delays,A.(type), B.(type), C.(type), D.(type));
 
-% transfer function
-[h5,w] = freqz(squeeze(tfB1),squeeze(tfA1),2^15, fs);
-[h6,w] = freqz(squeeze(tfB2),squeeze(tfA2),2^15, fs);
+
 
 %% 
 % plotting
@@ -179,24 +208,25 @@ colors = {[120,120,120]./255,  [0,135,255]./255, [120,120,120]./255,  [0,135,255
 for typeCell = types
     type = typeCell{1};
     res = db(abs(residues.(type)));
-    res = res - mean(res) +xx(i);
+    res = res +xx(i); % - mean(res);
     histogram(res,'FaceAlpha',0.2,'BinWidth',2,'FaceColor',colors{i},'Normalization', 'probability','Linewidth',1.5,'EdgeColor',colors{i})
     i = i+1;
 end
 txt = '$N=4$';
-text(0,0.275,txt, 'FontSize', 20, 'HorizontalAlignment','center')
+text(-80,0.35,txt, 'FontSize', 20, 'HorizontalAlignment','center')
 
 txt = '$N=6$';
-text(40,0.275,txt, 'FontSize', 20, 'HorizontalAlignment','center')
+text(-40,0.35,txt, 'FontSize', 20, 'HorizontalAlignment','center')
 
 txt = '$N=8$';
-text(80,0.275,txt, 'FontSize', 20, 'HorizontalAlignment','center')
+text(-0,0.35,txt, 'FontSize', 20, 'HorizontalAlignment','center')
 
 
-xticks([-10 0 10 20 30 40 50 60 70 80 90])
-xticklabels({'$-10$','$0$','$10$', [], '$-10$','$0$','$10$', [], '$-10$', '$0$','$10$', []})
-xlim([-30, 110])
-legend('Init','Optim')
+xticks([-90 -80 -70 -60 -50 -40 -30 -20 -10 0 10 20 30 40 50 60 70 80 90])
+xticklabels({'$-90$','$-80$','$-70$', [], '$-90$','$-80$','$-70$', [], '$-90$','$-80$','$-70$', []})
+xlim([-100, 20])
+ylim([0, 0.45])
+legend('Init','Optim', 'location', 'north', 'orientation', 'horizontal')
 xlabel('Magnitude (dB)')
 ylabel('Relative probability')
 ax=gca;
