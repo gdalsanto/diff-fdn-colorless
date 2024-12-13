@@ -1,4 +1,4 @@
-alpha,250
+alpha,325
 batch_size,4
 delays,[809.0, 877.0, 937.0, 1049.0, 1151.0, 1249.0, 1373.0, 1499.0]
 device,cuda
@@ -14,5 +14,5 @@ num,256
 samplerate,48000
 shuffle,True
 split,0.8
-testname,table34_dafx23_N08
-train_dir,output/table34_dafx23_N08/N8-035
+testname,table34_dafx23_N08_2
+train_dir,output/table34_dafx23_N08_2/N8-035

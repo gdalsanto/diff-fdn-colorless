@@ -1,0 +1,18 @@
+alpha,325
+batch_size,4
+delays,[997.0, 1153.0, 1327.0, 1559.0, 1801.0, 2099.0]
+device,cuda
+gain_per_sample,0.9999
+init_param,None
+log_epochs,False
+lr,0.001
+max_epochs,20
+max_nfft,480000
+min_nfft,384000
+n_runs,100
+num,256
+samplerate,48000
+shuffle,True
+split,0.8
+testname,table34_dafx23_N06_2
+train_dir,output/table34_dafx23_N06_2/N6-092

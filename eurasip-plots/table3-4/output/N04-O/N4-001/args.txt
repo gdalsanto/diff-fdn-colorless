@@ -1,0 +1,14 @@
+N,4
+batch_size,1
+device,cpu
+feedback_type,orthogonal
+lr,0.001
+masked_loss,True
+max_epochs,20
+n_runs,100
+nfft,960000
+num,240
+run_n,0
+samplerate,48000
+testname,N04-O
+train_dir,eurasip-plots/table3-4/output/N04-O/N4-001
