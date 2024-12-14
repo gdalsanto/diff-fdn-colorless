@@ -204,7 +204,7 @@ def main(args):
     # Initialize training process
     trainer = Trainer(model, max_epochs=args.max_epochs, lr=args.lr, train_dir=args.train_dir, device=args.device, patience_delta=1e-4, step_size=10)
     trainer.register_criterion(masked_mse_loss(nfft=args.nfft, n_samples=2000, n_sets=1, device=args.device), 1)
-    trainer.register_criterion(sparsity_loss(), 1, requires_model=True)
+    trainer.register_criterion(sparsity_loss(), args.alpha, requires_model=True)
     ## ---------------- TRAIN ---------------- ##
 
     # Train the model
@@ -270,6 +270,7 @@ if __name__ == "__main__":
     parser.add_argument('--feedback_type', type = str, default='orthogonal', help='Type of feedback matrix to use')
     parser.add_argument('--n_runs', type=int, default=1, help='number of runs')
     parser.add_argument('--testname', type=str, default='test')
+    parser.add_argument('--alpha', type=float, default=1, help='temporal loss scaling factor. Suggested values 2 or 1 (if scattering == true)')
     args = parser.parse_args()
 
     if args.n_runs == 1:
