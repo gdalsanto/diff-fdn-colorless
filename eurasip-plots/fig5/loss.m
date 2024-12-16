@@ -33,7 +33,7 @@ ylabel('Loss')
 ax=gca;
 ax.FontSize = 24;
 xlim([1, 10])
-ylim([-1.25, 1.5])
+ylim([0, 1.5])
 
 
 %% alpha = 0
@@ -123,7 +123,7 @@ xlabel('Time (s)','FontSize',24);
 ax=gca;
 ax.FontSize = 24;
 
-legend('Init', 'Optim (DAFx23)', 'Optim ($\alpha=0$)', 'Optim ($\alpha=1$)', 'Location','ousoutheast')
+legend('Init', 'Optim (DAFx23)', 'Optim ($\alpha=0$)', 'Optim ($\alpha=1$)', 'Location','southeast')
 function Y = skew(X)
     X = triu(X,1);
     Y = X - transpose(X);

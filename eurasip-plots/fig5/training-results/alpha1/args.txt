@@ -7,7 +7,7 @@ gain_per_sample,0.9999
 householder,False
 log_epochs,False
 lr,0.001
-max_epochs,20
+max_epochs,40
 num,480000
 octave_bands,1
 reference_ir,None
@@ -15,5 +15,5 @@ samplerate,48000
 scattering,False
 shuffle,True
 split,0.8
-train_dir,output/20240824-142906
+train_dir,output/20241216-161124
 transpose,False
