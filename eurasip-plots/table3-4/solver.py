@@ -15,9 +15,68 @@ from flamo.optimize.trainer import Trainer
 from flamo.processor import dsp, system
 from flamo.utils import save_audio
 from flamo.optimize.utils import generate_partitions
+from flamo.utils import to_complex
 
 
 torch.manual_seed(130709)
+
+class HouseholderMatrix(dsp.Gain):
+    r"""
+    HouseholderMatrix is a class that generates a Householder matrix for signal processing.
+
+        **Args**:
+            size (tuple, optional): Size of the matrix. Must be a square matrix. Defaults to (1, 1).
+            nfft (int, optional): Number of FFT points. Defaults to 2**11.
+            requires_grad (bool, optional): If True, gradients will be computed for the parameters. Defaults to False.
+            alias_decay_db (float, optional): Alias decay in decibels. Defaults to 0.0.
+            device (optional): Device on which to perform computations. Defaults to None.
+    """
+    def __init__(
+        self,
+        size: tuple = (1, 1),
+        nfft: int = 2**11,
+        requires_grad=False,
+        alias_decay_db: float = 0.0,
+        device=None
+    ):
+        assert size[0] == size[1], "Matrix must be square"
+        size = (size[0], 1)
+        map = lambda x: to_complex(x) / torch.norm(x, dim=0, keepdim=True)
+        super().__init__(
+            size=size,
+            nfft=nfft,
+            map=map,
+            requires_grad=requires_grad,
+            alias_decay_db=alias_decay_db,
+            device=device
+        )
+
+    def forward(self, x, ext_param=None):
+        self.check_input_shape(x)
+        if ext_param is None:
+            u = self.map(self.param)
+        else: 
+            # log the parameters that are being passed 
+            with torch.no_grad():
+                self.assign_value(ext_param)
+            # generate householder matrix from unitary vector
+            u = self.map(ext_param)
+        uTx = torch.einsum("mn,bfn...->bfm...", u.transpose(1, 0), x)
+        uuTx = torch.einsum("nm,bfm...->bfn...", u, uTx)
+        return x - 2 * uuTx
+
+    def check_input_shape(self, x):
+        if (self.size[0]) != (x.shape[2]):
+            raise ValueError(
+                f"parameter shape = {self.size} not compatible with input signal of shape = ({x.shape})."
+            )
+
+    def get_io(self):
+        r"""
+        Computes the number of input and output channels based on the size parameter.
+        """
+        self.input_channels = self.size[0]
+        self.output_channels = self.size[0]
 
 class sparsity_loss(nn.Module):
     """Calculates the sparsity loss for a given model."""
@@ -27,7 +86,7 @@ class sparsity_loss(nn.Module):
         try:
             isinstance(core.feedback_loop.feedback.mixing_matrix, dsp.HouseholderMatrix)
             u = torch.real(core.feedback_loop.feedback.mixing_matrix.map(core.feedback_loop.feedback.mixing_matrix.param))
-            A =  torch.eye(len(u), device=u.device) - 2 *  u*u.transpose(1,0)
+            A =  torch.eye(len(u), device=u.device) - 2 *  u.transpose(1,0)*u
         except:
             try: 
                 A = core.feedback_loop.feedback.map(core.feedback_loop.feedback.param)
@@ -147,7 +206,7 @@ def main(args):
         )
     elif args.feedback_type == 'householder':   
         # Feedback path with householder matrix
-        mixing_matrix = dsp.HouseholderMatrix(
+        mixing_matrix = HouseholderMatrix(
             size=(N, N),
             nfft=args.nfft,
             requires_grad=True,
