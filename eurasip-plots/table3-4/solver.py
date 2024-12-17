@@ -191,8 +191,8 @@ def main(args):
         
     elif args.feedback_type == 'scattering':
         # Feedback path with scattering matrix
-        m_L =  torch.randint(low=1, high=int(torch.floor(min(delay_lengths)/2)), size=[N]) 
-        m_R =  torch.randint(low=1, high=int(torch.floor(min(delay_lengths)/2)), size=[N]) 
+        m_L =  torch.randint(low=1, high=int(torch.floor(min(delay_lengths)/2)), size=[N], device=args.device) 
+        m_R =  torch.randint(low=1, high=int(torch.floor(min(delay_lengths)/2)), size=[N], device=args.device) 
         mixing_matrix = dsp.ScatteringMatrix(
             size=(4, N, N),
             nfft=args.nfft,
