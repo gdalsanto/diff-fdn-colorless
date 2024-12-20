@@ -23,13 +23,23 @@ tbl(toDelete,:) = [];
 
 hidRef = strcmpi(tbl.rating_stimulus,"C1");
 hidRefVal = tbl(hidRef,:).rating_score;
-outliers = tbl((tbl.rating_score < 60) & hidRef,:);
+outliers = tbl((tbl.rating_score < 90) & hidRef,:); % OLD : tbl((tbl.rating_score < 90) & hidRef,:);
+% an assessor should be excluded from the aggregated responses if he or she 
+% rates the hidden reference condition for > 15% of the test items lower 
+% than a score of 90
+outliers_uuid = unique(outliers.session_uuid);
 % remove the results from those outlier pages 
 toDelete = zeros(height(tbl), 1);
-for i = 1:height(outliers)
-    toDelete = toDelete | (strcmpi(tbl.session_uuid, outliers.session_uuid{i}) & strcmpi(tbl.trial_id, {outliers.trial_id{i}}));
+n_outliers = 0;
+for i = 1:height(outliers_uuid)
+     if sum(strcmp(outliers.session_uuid, outliers_uuid{i})) > height(tbl)/14/6*0.15
+         toDelete = toDelete | (strcmpi(tbl.session_uuid, outliers_uuid{i})); %  & strcmpi(tbl.trial_id, {outliers.trial_id{i}}));
+         n_outliers = n_outliers + 1; 
+     end
+%    OLD : toDelete = toDelete | (strcmpi(tbl.session_uuid, outliers.session_uuid{i}) & strcmpi(tbl.trial_id, {outliers.trial_id{i}}));
 end
 tbl(toDelete,:) = [];
+
 
 % substitude train id
 toSubstitude = strcmpi(tbl.trial_id,'N4D1A_LL') | strcmpi(tbl.trial_id,'N4D1B_LL');
