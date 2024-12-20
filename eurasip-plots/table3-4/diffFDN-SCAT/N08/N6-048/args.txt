@@ -1,0 +1,15 @@
+N,6
+alpha,1
+batch_size,1
+device,cuda
+feedback_type,scattering
+lr,0.001
+masked_loss,True
+max_epochs,30
+n_runs,300
+nfft,960000
+num,240
+run_n,47
+samplerate,48000
+testname,table34_diffFDN_SCAT_N06_300
+train_dir,eurasip-plots/table3-4/output/table34_diffFDN_SCAT_N06_300/N6-048
