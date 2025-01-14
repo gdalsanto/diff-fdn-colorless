@@ -25,4 +25,4 @@ class sparsity_loss(nn.Module):
     ''''''
     def forward(self, A):
         N = A.shape[-1]
-        return -(torch.sum(torch.abs(A)) - N)/(N*(np.sqrt(N)-1))
+        return -(torch.sum(torch.abs(A)) - N*np.sqrt(N))/(N*(np.sqrt(N)-1))
