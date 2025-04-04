@@ -1,0 +1,19 @@
+alpha,2
+batch_size,2000
+delays,[593.0, 743.0, 929.0, 1153.0, 1399.0, 1699.0]
+device,cuda
+edc_est_method,DecayFitNet
+gain_per_sample,0.9999
+householder,False
+log_epochs,False
+lr,0.001
+max_epochs,10
+num,480000
+octave_bands,1
+reference_ir,/Users/dalsag1/Dropbox (Aalto)/aalto/projects/project-colorlessFDN/git/diff-fdn-colorless/rirs/s3_r4_o.wav
+samplerate,48000
+scattering,False
+shuffle,True
+split,0.8
+train_dir,test
+transpose,False
