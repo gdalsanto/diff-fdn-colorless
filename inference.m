@@ -5,7 +5,7 @@ clear; clc; close all;
 
 addpath(genpath('fdnToolbox'))
 
-results_dir = "./output/20240514-143741";
+results_dir = "./test";
 output_dir = fullfile(results_dir, 'matlab');
 
 %% Analyse reference RIR 
