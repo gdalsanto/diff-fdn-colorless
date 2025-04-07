@@ -79,18 +79,21 @@ figure('Name', 'Homogeneous Decay')
 
 stdev_hm = zeros(1, length(RT));
 mns_hm = zeros(1, length(RT));
+
 for i_RT = 1:length(RT)
     g = 10^(-3/fs/RT(i_RT));  % gain per sample 
     Gamma = diag(g.^delays);
-
+    Gamma_sos = zeros(length(delays), 1, 1, 6);
+    Gamma_sos(:, :, :, 1) = g.^delays;
+    Gamma_sos(:, :, :, 4) = 1;
     % make matrix A orthogonal 
-    U = double(expm(skew(A*Gamma)));
-    [residues, poles, ~, ~, ~] = dss2pr(delays, U, B, C, D);
+    U = double(expm(skew(A)));% *Gamma)));
+    [residues, poles, ~, ~, ~] = dss2pr(delays, U, B, C, D, 'absorptionFilters', zSOS(Gamma_sos,'isDiagonal',true));
     % h = histogram(db(abs(residues)),'BinWidth',1);
     [N, edges] = histcounts(db(abs(residues)),'BinWidth',1);
     plot(edges(1:end-1), N, 'LineWidth',2); hold on;
     stdev_hm(i_RT) = std(residues);
-    mns_hm(i_RT) = mean(residues);
+    mns_hm(i_RT) = mean(residues); 
 end
 xlim([-200, -100])
 % frequnecy dependent attenuation 
@@ -106,7 +109,7 @@ figure('Name', 'Frequency Dependent Decay')
 stdev_fd = zeros(1, length(RT));
 mns_fd = zeros(1, length(RT));
 for i_RT = 1:length(RT)
-    targetT60_mod = targetT60 .* 10.*abs(randn(size(targetT60)));
+    targetT60_mod = targetT60 .* 5.*abs(randn(size(targetT60)));
     zAbsorption = zSOS(absorptionGEQ(targetT60_mod, delays, fs),'isDiagonal',true);
     % make matrix A orthogonal 
     U = double(expm(skew(A)));
